@@ -3,7 +3,7 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { ChipIcon } from "lucide-react";
+import { Chip } from "lucide-react"; // Changed from ChipIcon to Chip
 
 import MainLayout from "@/components/Layout/MainLayout";
 import SkillCard from "@/components/applicant/SkillCard";
@@ -77,7 +77,7 @@ export default function SkillAssessment() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <ChipIcon className="mr-2 h-5 w-5" />
+                <Chip className="mr-2 h-5 w-5" /> {/* Changed from ChipIcon to Chip */}
                 Add New Skill
               </CardTitle>
               <CardDescription>Add skills to your profile for assessment</CardDescription>
@@ -135,7 +135,7 @@ export default function SkillAssessment() {
             {skills.length === 0 && (
               <Card className="border-dashed">
                 <CardContent className="p-6 text-center">
-                  <ChipIcon className="mx-auto h-10 w-10 text-gray-300 mb-3" />
+                  <Chip className="mx-auto h-10 w-10 text-gray-300 mb-3" /> {/* Changed from ChipIcon to Chip */}
                   <h3 className="text-lg font-medium mb-1">No skills added yet</h3>
                   <p className="text-sm text-muted-foreground mb-4">
                     Add skills to your profile to get them evaluated
