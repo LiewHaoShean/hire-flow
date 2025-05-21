@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Inbox, Users, BarChart3, Activity, Calendar, ChevronRight } from "lucide-react";
 import MainLayout from "@/components/Layout/MainLayout";
@@ -6,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import ApplicantCard from "@/components/recruiter/ApplicantCard";
+import ChatbotAssistant from "@/components/recruiter/ChatbotAssistant";
 
 export default function RecruiterDashboard() {
   // Mock data
@@ -221,6 +221,9 @@ export default function RecruiterDashboard() {
           </div>
         </div>
       </div>
+      
+      {/* Add the ChatbotAssistant component */}
+      <ChatbotAssistant />
     </MainLayout>
   );
 }
