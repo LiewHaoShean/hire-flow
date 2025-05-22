@@ -19,6 +19,7 @@ import RecruiterDashboard from "./pages/recruiter/Dashboard";
 import JobPost from "./pages/recruiter/JobPost";
 import ApplicantReview from "./pages/recruiter/ApplicantReview";
 import RecommendedCandidates from "./pages/recruiter/RecommendedCandidates";
+import YourPosts from "./pages/recruiter/YourPosts";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const App = () => (
           {/* Recruiter Routes */}
           <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
           <Route path="/recruiter/post-job" element={<JobPost />} />
+          <Route path="/recruiter/your-posts" element={<YourPosts />} />
           <Route path="/recruiter/applicants/:id" element={<ApplicantReview />} />
           <Route path="/recruiter/recommendations" element={<RecommendedCandidates />} />
           

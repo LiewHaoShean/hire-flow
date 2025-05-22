@@ -3,7 +3,7 @@ import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
   User, LogOut, FileText, BarChart, Briefcase, 
-  Users, Plus, Menu, X 
+  Users, Plus, Menu, X, List
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -27,6 +27,7 @@ export default function MainLayout({ children, userType }: MainLayoutProps) {
   const recruiterLinks = [
     { name: "Dashboard", path: "/recruiter/dashboard", icon: <BarChart className="w-5 h-5 mr-2" /> },
     { name: "Post a Job", path: "/recruiter/post-job", icon: <Plus className="w-5 h-5 mr-2" /> },
+    { name: "Your Posts", path: "/recruiter/your-posts", icon: <List className="w-5 h-5 mr-2" /> },
     { name: "Recommendations", path: "/recruiter/recommendations", icon: <Users className="w-5 h-5 mr-2" /> },
   ];
   
