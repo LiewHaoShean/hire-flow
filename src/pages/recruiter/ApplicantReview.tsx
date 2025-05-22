@@ -1,322 +1,198 @@
-
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Calendar, Download, Briefcase, GraduationCap, Star, Check, X, Video } from "lucide-react";
-
-import MainLayout from "@/components/Layout/MainLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Check, Mail, Phone, Download, X } from "lucide-react";
+import MainLayout from "@/components/Layout/MainLayout";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+import { Separator } from "@/components/ui/separator";
+import ChatbotAssistant from "@/components/recruiter/ChatbotAssistant";
 
 export default function ApplicantReview() {
-  const { id } = useParams<{ id: string }>();
-  const { toast } = useToast();
-  
-  // Mock applicant data
-  const applicant = {
-    id: id || "1",
-    name: "Jane Smith",
-    title: "Senior Frontend Developer",
-    email: "jane.smith@example.com",
-    phone: "(555) 123-4567",
-    location: "San Francisco, CA",
-    photo: "https://i.pravatar.cc/300?img=1",
-    application: {
-      position: "Senior Frontend Developer",
-      company: "TechCorp Inc.",
-      date: "2025-05-18",
-      coverLetter: "Dear Hiring Manager, I am excited to apply for the Senior Frontend Developer position at TechCorp Inc. With over 5 years of experience in frontend development using React and TypeScript, I believe I would be a valuable addition to your team. I have a strong track record of building responsive and performant web applications and I am passionate about creating exceptional user experiences.",
-    },
+  const [applicant, setApplicant] = useState({
+    name: "John Doe",
+    email: "john.doe@example.com",
+    phone: "123-456-7890",
+    location: "New York, NY",
+    title: "Software Engineer",
     experience: [
       {
-        title: "Frontend Developer",
-        company: "WebTech Solutions",
-        duration: "2020 - Present",
-        description: "Led development of the company's main SaaS product, improving performance by 35% and implementing new features that increased user retention."
+        title: "Software Engineer",
+        company: "Tech Corp",
+        years: "2020 - Present",
+        description:
+          "Developed and maintained web applications using React and Node.js.",
       },
       {
-        title: "Junior Developer",
-        company: "Tech Startups Inc.",
-        duration: "2019 - 2020",
-        description: "Worked on various frontend projects using React and collaborated with designers to implement responsive UI components."
-      }
+        title: "Frontend Developer",
+        company: "Web Solutions",
+        years: "2018 - 2020",
+        description: "Built responsive user interfaces using HTML, CSS, and JavaScript.",
+      },
     ],
     education: [
       {
         degree: "Bachelor of Science in Computer Science",
-        school: "University of California, Berkeley",
-        year: "2015 - 2019"
-      }
+        university: "University of Tech",
+        years: "2014 - 2018",
+      },
     ],
-    skills: [
-      { name: "React", level: 95 },
-      { name: "TypeScript", level: 90 },
-      { name: "JavaScript", level: 95 },
-      { name: "HTML/CSS", level: 85 },
-      { name: "Node.js", level: 70 },
-      { name: "GraphQL", level: 75 }
-    ],
-    assessments: {
-      technical: 92,
-      communication: 88,
-      problemSolving: 90,
-      culturalFit: 85
-    },
-    resumeUrl: "#"
-  };
-  
-  const [status, setStatus] = useState<'pending' | 'accepted' | 'rejected'>('pending');
-  
-  const handleAccept = () => {
-    setStatus('accepted');
-    toast({
-      title: "Applicant Accepted",
-      description: `${applicant.name} has been moved to the accepted candidates list.`
-    });
-  };
-  
-  const handleReject = () => {
-    setStatus('rejected');
-    toast({
-      title: "Applicant Rejected",
-      description: `${applicant.name} has been moved to the rejected candidates list.`
-    });
-  };
-  
-  const scheduleInterview = () => {
-    toast({
-      title: "Interview Scheduled",
-      description: `Interview with ${applicant.name} has been scheduled.`
-    });
-  };
-  
+    skills: ["JavaScript", "React", "Node.js", "HTML", "CSS"],
+    certifications: ["Certified React Developer", "AWS Certified Developer"],
+    resume: "john_doe_resume.pdf",
+    profileCompletion: 85,
+  });
+
   return (
     <MainLayout userType="recruiter">
-      <div className="page-container max-w-5xl">
-        <Link to="/recruiter/dashboard" className="inline-flex items-center text-hr-blue hover:underline mb-6">
-          <ArrowLeft className="h-4 w-4 mr-1" /> Back to dashboard
-        </Link>
-        
-        {/* Applicant Header */}
-        <div className="flex flex-col md:flex-row gap-6 mb-8">
-          <div className="w-24 h-24 rounded-full overflow-hidden flex-shrink-0 bg-gray-200 mx-auto md:mx-0">
-            <img src={applicant.photo} alt={applicant.name} className="w-full h-full object-cover" />
+      <div className="page-container">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="mb-2">Applicant Review</h1>
+            <p className="text-muted-foreground">
+              Review applicant details and make a decision
+            </p>
           </div>
-          
-          <div className="flex-1">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-              <div>
-                <h1 className="text-2xl md:text-3xl font-semibold mb-1">{applicant.name}</h1>
-                <p className="text-lg text-muted-foreground mb-2">{applicant.title}</p>
-                
-                <div className="flex flex-wrap gap-2 mb-2">
-                  <Badge variant="outline">{applicant.location}</Badge>
-                  <Badge 
-                    variant={status === 'pending' ? 'outline' : (status === 'accepted' ? 'success' : 'destructive')}
-                  >
-                    {status === 'pending' ? 'Under Review' : (status === 'accepted' ? 'Accepted' : 'Rejected')}
-                  </Badge>
-                </div>
-              </div>
-              
-              <div className="flex gap-2 mt-4 md:mt-0">
-                <Button variant="outline" size="sm" onClick={scheduleInterview}>
-                  <Calendar className="h-4 w-4 mr-2" /> Schedule Interview
-                </Button>
-                <Button variant="outline" size="sm" asChild>
-                  <a href={applicant.resumeUrl} download>
-                    <Download className="h-4 w-4 mr-2" /> Download Resume
-                  </a>
-                </Button>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4 text-sm mt-4">
-              <div className="flex items-center text-muted-foreground">
-                <Calendar className="h-4 w-4 mr-2" /> Applied on {new Date(applicant.application.date).toLocaleDateString()}
-              </div>
-              <div className="flex items-center text-muted-foreground">
-                <Briefcase className="h-4 w-4 mr-2" /> {applicant.application.position} at {applicant.application.company}
-              </div>
-            </div>
-          </div>
+          <ChatbotAssistant />
         </div>
-        
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left column: Skills & Assessment */}
-          <div className="space-y-6 order-2 lg:order-1">
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Left Column - Profile Summary */}
+          <div className="lg:col-span-1">
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Skill Assessment</CardTitle>
+              <CardHeader>
+                <CardTitle>Profile Summary</CardTitle>
+                <CardDescription>Applicant details at a glance</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {applicant.skills.map((skill) => (
-                  <div key={skill.name} className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span>{skill.name}</span>
-                      <span className="font-medium">{skill.level}%</span>
-                    </div>
-                    <Progress value={skill.level} className="h-2" />
+              <CardContent className="flex flex-col items-center">
+                <Avatar className="h-24 w-24 mb-4">
+                  <AvatarImage src="https://github.com/shadcn.png" alt={applicant.name} />
+                  <AvatarFallback>{applicant.name.substring(0, 2)}</AvatarFallback>
+                </Avatar>
+                <h3 className="text-lg font-semibold">{applicant.name}</h3>
+                <p className="text-muted-foreground">{applicant.title}</p>
+                <div className="flex items-center mt-2">
+                  <Mail className="mr-2 h-4 w-4" />
+                  <a href={`mailto:${applicant.email}`} className="text-sm text-blue-500">
+                    {applicant.email}
+                  </a>
+                </div>
+                <div className="flex items-center mt-1">
+                  <Phone className="mr-2 h-4 w-4" />
+                  <span className="text-sm">{applicant.phone}</span>
+                </div>
+                <div className="flex items-center mt-1">
+                  <span className="text-sm">{applicant.location}</span>
+                </div>
+                <Separator className="my-4" />
+                <div className="w-full">
+                  <Label className="text-sm">Profile Completion</Label>
+                  <Progress value={applicant.profileCompletion} className="h-2 mt-1" />
+                  <p className="text-xs text-muted-foreground mt-1 text-right">
+                    {applicant.profileCompletion}%
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column - Detailed Information */}
+          <div className="lg:col-span-3">
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Experience</CardTitle>
+                <CardDescription>Professional history</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {applicant.experience.map((exp, index) => (
+                  <div key={index} className={index > 0 ? "mt-6 pt-6 border-t" : ""}>
+                    <h4 className="font-semibold">{exp.title}</h4>
+                    <p className="text-muted-foreground">{exp.company}</p>
+                    <p className="text-sm text-muted-foreground">{exp.years}</p>
+                    <p className="mt-2">{exp.description}</p>
                   </div>
                 ))}
               </CardContent>
             </Card>
-            
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">AI Assessment</CardTitle>
+
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Education</CardTitle>
+                <CardDescription>Academic background</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span>Technical Skills</span>
-                    <span className="font-medium">{applicant.assessments.technical}%</span>
+              <CardContent>
+                {applicant.education.map((edu, index) => (
+                  <div key={index} className={index > 0 ? "mt-6 pt-6 border-t" : ""}>
+                    <h4 className="font-semibold">{edu.degree}</h4>
+                    <p className="text-muted-foreground">{edu.university}</p>
+                    <p className="text-sm text-muted-foreground">{edu.years}</p>
                   </div>
-                  <Progress value={applicant.assessments.technical} className="h-2" />
+                ))}
+              </CardContent>
+            </Card>
+
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Skills & Certifications</CardTitle>
+                <CardDescription>Technical proficiencies</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4">
+                  <Label className="text-sm">Skills</Label>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {applicant.skills.map((skill, index) => (
+                      <Badge key={index}>{skill}</Badge>
+                    ))}
+                  </div>
                 </div>
-                
-                <div className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span>Communication</span>
-                    <span className="font-medium">{applicant.assessments.communication}%</span>
+                <div>
+                  <Label className="text-sm">Certifications</Label>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {applicant.certifications.map((cert, index) => (
+                      <Badge key={index}>{cert}</Badge>
+                    ))}
                   </div>
-                  <Progress value={applicant.assessments.communication} className="h-2" />
-                </div>
-                
-                <div className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span>Problem Solving</span>
-                    <span className="font-medium">{applicant.assessments.problemSolving}%</span>
-                  </div>
-                  <Progress value={applicant.assessments.problemSolving} className="h-2" />
-                </div>
-                
-                <div className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span>Cultural Fit</span>
-                    <span className="font-medium">{applicant.assessments.culturalFit}%</span>
-                  </div>
-                  <Progress value={applicant.assessments.culturalFit} className="h-2" />
                 </div>
               </CardContent>
             </Card>
-            
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Actions</CardTitle>
+
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Resume</CardTitle>
+                <CardDescription>Download applicant's resume</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {status === 'pending' && (
-                  <>
-                    <Button onClick={handleAccept} className="w-full mb-2">
-                      <Check className="h-4 w-4 mr-2" /> Accept Candidate
-                    </Button>
-                    <Button variant="outline" onClick={handleReject} className="w-full">
-                      <X className="h-4 w-4 mr-2" /> Reject Candidate
-                    </Button>
-                  </>
-                )}
-                
-                {status === 'accepted' && (
-                  <Button className="w-full" onClick={scheduleInterview}>
-                    <Video className="h-4 w-4 mr-2" /> Schedule Interview
-                  </Button>
-                )}
-                
-                {status === 'rejected' && (
-                  <div className="text-center text-muted-foreground">
-                    <p>Candidate has been rejected.</p>
-                    <Button variant="ghost" onClick={() => setStatus('pending')} className="mt-2">
-                      Undo Rejection
-                    </Button>
-                  </div>
-                )}
+              <CardContent>
+                <Button variant="outline">
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Resume ({applicant.resume})
+                </Button>
               </CardContent>
             </Card>
-          </div>
-          
-          {/* Right column: Profile details */}
-          <div className="lg:col-span-2 order-1 lg:order-2">
-            <Tabs defaultValue="profile">
-              <TabsList className="mb-4">
-                <TabsTrigger value="profile">Profile</TabsTrigger>
-                <TabsTrigger value="application">Application</TabsTrigger>
-                <TabsTrigger value="notes">Notes</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="profile" className="space-y-6">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center">
-                      <Briefcase className="h-4 w-4 mr-2" /> 
-                      Work Experience
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {applicant.experience.map((exp, index) => (
-                      <div key={index} className={index > 0 ? "pt-4 border-t" : ""}>
-                        <h3 className="font-medium">{exp.title}</h3>
-                        <div className="flex justify-between mb-1">
-                          <span className="text-muted-foreground">{exp.company}</span>
-                          <span className="text-sm text-muted-foreground">{exp.duration}</span>
-                        </div>
-                        <p className="text-sm">{exp.description}</p>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center">
-                      <GraduationCap className="h-4 w-4 mr-2" /> 
-                      Education
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {applicant.education.map((edu, index) => (
-                      <div key={index} className={index > 0 ? "pt-4 border-t" : ""}>
-                        <h3 className="font-medium">{edu.degree}</h3>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">{edu.school}</span>
-                          <span className="text-sm text-muted-foreground">{edu.year}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="application">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">Cover Letter</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="whitespace-pre-line">{applicant.application.coverLetter}</p>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="notes">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">Interview Notes</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <textarea 
-                      className="w-full min-h-[200px] p-3 border rounded-md" 
-                      placeholder="Add your interview notes here..."
-                    />
-                    <Button className="mt-4">Save Notes</Button>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Decision</CardTitle>
+                <CardDescription>Approve or reject applicant</CardDescription>
+              </CardHeader>
+              <CardContent className="flex justify-end">
+                <Button variant="destructive" className="mr-2">
+                  <X className="mr-1 h-4 w-4" /> Reject
+                </Button>
+                <Button variant="secondary" className="ml-2">
+                  <Check className="mr-1 h-4 w-4" /> Approve
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

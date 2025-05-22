@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Upload, UserCircle, Save, Plus, Trash2 } from "lucide-react";
+import { Upload, UserCircle, Save, Plus, Trash2, Award } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import MainLayout from "@/components/Layout/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,6 +50,20 @@ export default function ApplicantProfile() {
         endDate: "2020-01",
         description: "Worked on various frontend projects using React and collaborated with designers to implement responsive UI components."
       }
+    ],
+    certifications: [
+      {
+        name: "AWS Certified Solutions Architect",
+        issuer: "Amazon Web Services",
+        date: "2023-05",
+        credential: "AWS-123456"
+      },
+      {
+        name: "React Developer Certification",
+        issuer: "Meta",
+        date: "2022-08",
+        credential: "REACT-789012"
+      }
     ]
   });
   
@@ -95,6 +108,21 @@ export default function ApplicantProfile() {
               school: "Frontend Masters",
               year: "2020"
             }
+          ],
+          certifications: [
+            ...profile.certifications,
+            {
+              name: "AWS Certified Solutions Architect",
+              issuer: "Amazon Web Services",
+              date: "2023-05",
+              credential: "AWS-123456"
+            },
+            {
+              name: "React Developer Certification",
+              issuer: "Meta",
+              date: "2022-08",
+              credential: "REACT-789012"
+            }
           ]
         });
         
@@ -127,6 +155,52 @@ export default function ApplicantProfile() {
     setProfile({
       ...profile,
       skills: profile.skills.filter(skill => skill !== skillToRemove)
+    });
+  };
+  
+  const addCertification = () => {
+    const newCertName = prompt("Enter certification name:");
+    if (!newCertName) return;
+    
+    const newIssuer = prompt("Enter issuing organization:");
+    if (!newIssuer) return;
+    
+    const newDate = prompt("Enter date (YYYY-MM):");
+    if (!newDate) return;
+    
+    const newCredential = prompt("Enter credential ID (optional):");
+    
+    setProfile({
+      ...profile,
+      certifications: [
+        ...profile.certifications,
+        {
+          name: newCertName,
+          issuer: newIssuer,
+          date: newDate,
+          credential: newCredential || ""
+        }
+      ]
+    });
+    
+    toast({
+      title: "Certificate Added",
+      description: `${newCertName} has been added to your profile.`,
+    });
+  };
+  
+  const removeCertification = (index: number) => {
+    const updatedCertifications = [...profile.certifications];
+    updatedCertifications.splice(index, 1);
+    
+    setProfile({
+      ...profile,
+      certifications: updatedCertifications
+    });
+    
+    toast({
+      title: "Certificate Removed",
+      description: "The certificate has been removed from your profile.",
     });
   };
   
@@ -283,6 +357,54 @@ export default function ApplicantProfile() {
             <p className="text-sm text-muted-foreground">
               Tip: Add skills that are relevant to the positions you're interested in.
             </p>
+          </CardContent>
+        </Card>
+        
+        {/* Certifications - NEW SECTION */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Award className="mr-2 h-5 w-5" />
+              Certifications
+            </CardTitle>
+            <CardDescription>Add professional certifications to enhance your profile</CardDescription>
+          </CardHeader>
+          
+          <CardContent>
+            <div className="space-y-6">
+              {profile.certifications.map((cert, index) => (
+                <div key={index} className={index > 0 ? "pt-6 border-t" : ""}>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium">{cert.name}</h4>
+                      <p>{cert.issuer}</p>
+                      {cert.credential && (
+                        <p className="text-sm text-muted-foreground">Credential ID: {cert.credential}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center">
+                      <p className="text-sm text-muted-foreground mr-3">
+                        {new Date(cert.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
+                      </p>
+                      <button 
+                        onClick={() => removeCertification(index)}
+                        className="text-gray-400 hover:text-red-500"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {profile.certifications.length === 0 && (
+                <p className="text-sm text-muted-foreground italic">No certifications added yet.</p>
+              )}
+              
+              <Button variant="outline" className="w-full" onClick={addCertification}>
+                <Plus className="h-4 w-4 mr-2" /> Add Certification
+              </Button>
+            </div>
           </CardContent>
         </Card>
         
