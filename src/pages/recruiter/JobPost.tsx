@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, X, Upload, FileText } from "lucide-react";
+import DocumentAIExtractor from "@/components/recruiter/DocumentAIExtractor";
 
 // Define the schema for the job post form
 const jobFormSchema = z.object({
@@ -117,9 +118,13 @@ export default function JobPost() {
   return (
     <MainLayout userType="recruiter">
       <div className="page-container">
-        <div className="mb-8">
-          <h1 className="mb-2">Post a Job</h1>
-          <p className="text-muted-foreground">Create a new job posting to attract the best candidates</p>
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="mb-2">Post a Job</h1>
+            <p className="text-muted-foreground">Create a new job posting to attract the best candidates</p>
+          </div>
+          
+          <DocumentAIExtractor form={form} setSkills={setSkills} />
         </div>
         
         <Card>
