@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Upload, FileText } from "lucide-react";
 
 // Define the schema for the job post form
 const jobFormSchema = z.object({
@@ -38,6 +37,7 @@ interface Skill {
 export default function JobPost() {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [newSkillLevel, setNewSkillLevel] = useState<SkillLevel>("intermediate");
+  const [uploadedDocuments, setUploadedDocuments] = useState<File[]>([]);
   
   const form = useForm<z.infer<typeof jobFormSchema>>({
     resolver: zodResolver(jobFormSchema),
@@ -80,6 +80,19 @@ export default function JobPost() {
     }
   };
   
+  const handleDocumentUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newFiles = Array.from(files);
+      setUploadedDocuments(prev => [...prev, ...newFiles]);
+      toast.success(`${newFiles.length} document(s) uploaded successfully`);
+    }
+  };
+  
+  const removeDocument = (index: number) => {
+    setUploadedDocuments(prev => prev.filter((_, i) => i !== index));
+  };
+  
   const onSubmit = (data: z.infer<typeof jobFormSchema>) => {
     if (skills.length === 0) {
       toast.error("Please add at least one required skill");
@@ -87,13 +100,18 @@ export default function JobPost() {
     }
     
     // Here you would typically send the data to your backend
-    console.log({ ...data, requiredSkills: skills });
+    console.log({ 
+      ...data, 
+      requiredSkills: skills,
+      documents: uploadedDocuments.map(file => ({ name: file.name, size: file.size }))
+    });
     
     toast.success("Job posted successfully!");
     
     // Reset form
     form.reset();
     setSkills([]);
+    setUploadedDocuments([]);
   };
   
   return (
@@ -270,6 +288,62 @@ export default function JobPost() {
                     >
                       <Plus className="h-4 w-4 mr-1" /> Add
                     </Button>
+                  </div>
+                </div>
+                
+                {/* Document Upload Section */}
+                <div className="space-y-4">
+                  <div>
+                    <FormLabel>Upload Documents (Optional)</FormLabel>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Upload job-related documents that will be scanned for additional requirements
+                    </p>
+                    
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                      <input
+                        type="file"
+                        multiple
+                        accept=".pdf,.doc,.docx,.txt"
+                        onChange={handleDocumentUpload}
+                        className="hidden"
+                        id="document-upload"
+                      />
+                      <label htmlFor="document-upload" className="cursor-pointer">
+                        <Upload className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+                        <p className="text-sm font-medium text-gray-600 mb-1">
+                          Click to upload documents
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          PDF, DOC, DOCX, or TXT files up to 10MB
+                        </p>
+                      </label>
+                    </div>
+                    
+                    {uploadedDocuments.length > 0 && (
+                      <div className="mt-4 space-y-2">
+                        <p className="text-sm font-medium">Uploaded Documents:</p>
+                        {uploadedDocuments.map((file, index) => (
+                          <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4 text-blue-500" />
+                              <span className="text-sm">{file.name}</span>
+                              <span className="text-xs text-gray-500">
+                                ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                              </span>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeDocument(index)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
                 
