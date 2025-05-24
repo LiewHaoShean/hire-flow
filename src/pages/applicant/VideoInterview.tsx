@@ -1,5 +1,4 @@
-
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Play, Pause, RefreshCw, ChevronRight } from "lucide-react";
 import MainLayout from "@/components/Layout/MainLayout";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,8 @@ export default function VideoInterview() {
   const [recordingTime, setRecordingTime] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [videoSubmitted, setVideoSubmitted] = useState(false);
+  const [assessmentTimer, setAssessmentTimer] = useState(20); // Set to 20 seconds
+  const [isAssessmentActive, setIsAssessmentActive] = useState(false);
   const [results, setResults] = useState<null | {
     confidence: string;
     communication: string;
@@ -22,6 +23,7 @@ export default function VideoInterview() {
     feedback: string;
   }>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const assessmentTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   const questions = [
     "Tell me about yourself and your background.",
@@ -29,11 +31,33 @@ export default function VideoInterview() {
     "Describe a challenging situation you faced at work and how you resolved it.",
     "Why are you interested in this position?",
   ];
+
+  // Auto-submit when assessment timer reaches 0
+  useEffect(() => {
+    if (isAssessmentActive && assessmentTimer === 0) {
+      handleSubmitEvaluation();
+    }
+  }, [assessmentTimer, isAssessmentActive]);
   
   const startRecording = () => {
     setIsRecording(true);
+    setIsAssessmentActive(true);
+    setAssessmentTimer(20); // Reset to 20 seconds
+    
+    // Start recording timer
     timerRef.current = setInterval(() => {
       setRecordingTime(prev => prev + 1);
+    }, 1000);
+    
+    // Start assessment timer
+    assessmentTimerRef.current = setInterval(() => {
+      setAssessmentTimer(prev => {
+        if (prev <= 1) {
+          clearInterval(assessmentTimerRef.current!);
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
     
     toast({
@@ -46,7 +70,11 @@ export default function VideoInterview() {
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
+    if (assessmentTimerRef.current) {
+      clearInterval(assessmentTimerRef.current);
+    }
     setIsRecording(false);
+    setIsAssessmentActive(false);
     
     toast({
       title: "Recording Stopped",
@@ -58,8 +86,13 @@ export default function VideoInterview() {
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
+    if (assessmentTimerRef.current) {
+      clearInterval(assessmentTimerRef.current);
+    }
     setIsRecording(false);
+    setIsAssessmentActive(false);
     setRecordingTime(0);
+    setAssessmentTimer(20);
     
     toast({
       title: "Recording Reset",
@@ -71,13 +104,38 @@ export default function VideoInterview() {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(prev => prev + 1);
       setRecordingTime(0);
+      setAssessmentTimer(20);
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
+      if (assessmentTimerRef.current) {
+        clearInterval(assessmentTimerRef.current);
+      }
       setIsRecording(false);
+      setIsAssessmentActive(false);
     } else {
       submitInterview();
     }
+  };
+  
+  const handleSubmitEvaluation = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    if (assessmentTimerRef.current) {
+      clearInterval(assessmentTimerRef.current);
+    }
+    setIsRecording(false);
+    setIsAssessmentActive(false);
+    
+    if (assessmentTimer === 0) {
+      toast({
+        title: "Time's Up!",
+        description: "Your response has been automatically submitted.",
+      });
+    }
+    
+    nextQuestion();
   };
   
   const submitInterview = () => {
@@ -191,6 +249,20 @@ export default function VideoInterview() {
                     </div>
                   </div>
                   
+                  {/* Assessment Timer */}
+                  {isAssessmentActive && (
+                    <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <div className="flex items-center justify-center">
+                        <span className="text-2xl font-bold text-red-600">
+                          {assessmentTimer}s
+                        </span>
+                      </div>
+                      <p className="text-center text-sm text-red-600 mt-1">
+                        Time remaining - Answer will auto-submit when timer reaches 0
+                      </p>
+                    </div>
+                  )}
+                  
                   {/* Recording controls */}
                   <div className="flex justify-center gap-3">
                     {!isRecording ? (
@@ -216,8 +288,8 @@ export default function VideoInterview() {
                   </p>
                   
                   <Button 
-                    onClick={nextQuestion} 
-                    disabled={recordingTime === 0}
+                    onClick={handleSubmitEvaluation} 
+                    disabled={recordingTime === 0 && !isAssessmentActive}
                     className="ml-auto"
                   >
                     {currentQuestion < questions.length - 1 ? (
@@ -234,7 +306,7 @@ export default function VideoInterview() {
                 <ul className="list-disc pl-5 space-y-1 text-muted-foreground text-sm">
                   <li>Ensure you are in a quiet environment with good lighting</li>
                   <li>Speak clearly and maintain eye contact with the camera</li>
-                  <li>Keep your responses concise and relevant (1-2 minutes per question)</li>
+                  <li>Keep your responses concise and relevant (20 seconds per question)</li>
                   <li>Show enthusiasm and positive body language</li>
                 </ul>
               </div>

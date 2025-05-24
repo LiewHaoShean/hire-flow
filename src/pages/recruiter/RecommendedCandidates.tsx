@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Filter, Star, ArrowRight, User, Award } from "lucide-react";
+import { Search, Filter, Star, ArrowRight, User, Award, Send } from "lucide-react";
 
 import MainLayout from "@/components/Layout/MainLayout";
 import { Button } from "@/components/ui/button";
@@ -11,10 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 
 export default function RecommendedCandidates() {
   const [searchTerm, setSearchTerm] = useState("");
   const [jobFilter, setJobFilter] = useState("all");
+  const [invitedCandidates, setInvitedCandidates] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
   
   // Mock data for recommended candidates
   const candidates = [
@@ -77,6 +80,15 @@ export default function RecommendedCandidates() {
     "Product Designer",
     "DevOps Specialist"
   ];
+
+  const handleSendInvitation = (candidateId: string, candidateName: string) => {
+    setInvitedCandidates(prev => new Set([...prev, candidateId]));
+    
+    toast({
+      title: "Invitation Sent Successfully!",
+      description: `Interview invitation sent to ${candidateName}`,
+    });
+  };
   
   // Filter candidates based on search and job filter
   const filteredCandidates = candidates.filter(candidate => {
@@ -181,17 +193,35 @@ export default function RecommendedCandidates() {
                   </div>
                 </div>
                 
-                <div className="flex flex-row md:flex-col justify-between md:justify-center items-center p-4 bg-gray-50 border-t md:border-t-0 md:border-l">
-                  <div className="text-sm text-muted-foreground">
+                <div className="flex flex-row md:flex-col justify-between md:justify-center items-center p-4 bg-gray-50 border-t md:border-t-0 md:border-l gap-2">
+                  <div className="text-sm text-muted-foreground text-center">
                     <span>Best for:</span>
                     <p className="font-medium">{candidate.jobMatch}</p>
                   </div>
                   
-                  <Link to={`/recruiter/applicants/${candidate.id}`}>
-                    <Button size="sm" className="mt-2">
-                      View Profile <ArrowRight className="ml-2 h-4 w-4" />
+                  <div className="flex flex-col gap-2">
+                    <Link to={`/recruiter/applicants/${candidate.id}`}>
+                      <Button size="sm" variant="outline">
+                        View Profile <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </Link>
+                    
+                    <Button 
+                      size="sm" 
+                      onClick={() => handleSendInvitation(candidate.id, candidate.name)}
+                      disabled={invitedCandidates.has(candidate.id)}
+                      className={invitedCandidates.has(candidate.id) ? "bg-green-500 hover:bg-green-600" : ""}
+                    >
+                      {invitedCandidates.has(candidate.id) ? (
+                        "Invited ✓"
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4 mr-2" />
+                          Send Invitation
+                        </>
+                      )}
                     </Button>
-                  </Link>
+                  </div>
                 </div>
               </div>
             </Card>
