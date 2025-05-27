@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, X } from "lucide-react";
-import DocumentAIExtractor from "@/components/recruiter/DocumentAIExtractor";
+import InterviewConfiguration, { InterviewRound } from "@/components/recruiter/InterviewConfiguration";
 
 // Define the schema for the job post form
 const jobFormSchema = z.object({
@@ -37,8 +37,10 @@ interface Skill {
 }
 
 export default function JobPost() {
+  const [currentStep, setCurrentStep] = useState<"details" | "interview">("details");
   const [skills, setSkills] = useState<Skill[]>([]);
   const [newSkillLevel, setNewSkillLevel] = useState<SkillLevel>("intermediate");
+  const [jobData, setJobData] = useState<any>(null);
   
   const form = useForm<z.infer<typeof jobFormSchema>>({
     resolver: zodResolver(jobFormSchema),
@@ -81,35 +83,58 @@ export default function JobPost() {
     }
   };
   
-  const onSubmit = (data: z.infer<typeof jobFormSchema>) => {
+  const onJobDetailsSubmit = (data: z.infer<typeof jobFormSchema>) => {
     if (skills.length === 0) {
       toast.error("Please add at least one required skill");
       return;
     }
     
+    setJobData({ ...data, requiredSkills: skills });
+    setCurrentStep("interview");
+    toast.success("Job details saved! Now configure the interview process.");
+  };
+
+  const onInterviewComplete = (rounds: InterviewRound[]) => {
+    const completeJobData = {
+      ...jobData,
+      interviewRounds: rounds
+    };
+    
     // Here you would typically send the data to your backend
-    console.log({ 
-      ...data, 
-      requiredSkills: skills
-    });
+    console.log("Complete job data:", completeJobData);
     
-    toast.success("Job posted successfully!");
+    toast.success("Job posted successfully with interview configuration!");
     
-    // Reset form
+    // Reset form and go back to step 1
     form.reset();
     setSkills([]);
+    setJobData(null);
+    setCurrentStep("details");
   };
+
+  const goBackToDetails = () => {
+    setCurrentStep("details");
+  };
+  
+  if (currentStep === "interview") {
+    return (
+      <MainLayout userType="recruiter">
+        <div className="page-container">
+          <InterviewConfiguration 
+            onComplete={onInterviewComplete}
+            onBack={goBackToDetails}
+          />
+        </div>
+      </MainLayout>
+    );
+  }
   
   return (
     <MainLayout userType="recruiter">
       <div className="page-container">
-        <div className="mb-8 flex justify-between items-start">
-          <div>
-            <h1 className="mb-2">Post a Job</h1>
-            <p className="text-muted-foreground">Create a new job posting to attract the best candidates</p>
-          </div>
-          
-          <DocumentAIExtractor form={form} setSkills={setSkills} />
+        <div className="mb-8">
+          <h1 className="mb-2">Post a Job</h1>
+          <p className="text-muted-foreground">Create a new job posting to attract the best candidates</p>
         </div>
         
         <Card>
@@ -118,7 +143,7 @@ export default function JobPost() {
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={form.handleSubmit(onJobDetailsSubmit)} className="space-y-6">
                 {/* Basic job information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
@@ -359,7 +384,7 @@ export default function JobPost() {
                 
                 <div className="pt-4">
                   <Button type="submit" className="w-full md:w-auto">
-                    Post Job
+                    Next: Configure Interview
                   </Button>
                 </div>
               </form>
