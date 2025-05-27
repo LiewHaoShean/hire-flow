@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import MainLayout from "@/components/Layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, Users, Calendar, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import InterviewRounds from "@/components/recruiter/InterviewRounds";
 
 // Mock data
 const jobsByDepartment = {
@@ -276,6 +276,16 @@ export default function YourPosts() {
                 </div>
               </CardContent>
             </Card>
+            
+            <div className="mb-4">
+              <InterviewRounds 
+                applicants={applicantRankingsData.map(app => ({
+                  id: app.id,
+                  name: app.name,
+                  matchScore: app.matchScore
+                }))}
+              />
+            </div>
             
             <Card>
               <CardHeader className="pb-3">
