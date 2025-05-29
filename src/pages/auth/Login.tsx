@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,6 +27,7 @@ export default function Login() {
   // Determine initial tab from URL parameters
   const searchParams = new URLSearchParams(location.search);
   const initialRole = searchParams.get("role") || "applicant";
+  const [activeRole, setActiveRole] = useState(initialRole);
   
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -49,9 +49,7 @@ export default function Login() {
         description: "Welcome back to HireFlow!",
       });
       
-      // Redirect based on role
-      const activeRole = document.querySelector('[data-state="active"]')?.getAttribute('value') || initialRole;
-      
+      // Redirect based on active role
       if (activeRole === "recruiter") {
         navigate("/recruiter/dashboard");
       } else {
@@ -82,7 +80,7 @@ export default function Login() {
         </div>
       }
     >
-      <Tabs defaultValue={initialRole} className="w-full">
+      <Tabs defaultValue={initialRole} onValueChange={setActiveRole} className="w-full">
         <TabsList className="grid grid-cols-2 mb-4">
           <TabsTrigger value="applicant">I'm a Job Seeker</TabsTrigger>
           <TabsTrigger value="recruiter">I'm a Recruiter</TabsTrigger>
