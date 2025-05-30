@@ -1,5 +1,6 @@
+
 import { Link } from "react-router-dom";
-import { Inbox, Users, BarChart3, Activity, Calendar, ChevronRight } from "lucide-react";
+import { Inbox, Users, BarChart3, Activity, Calendar, ChevronRight, Building, ArrowRight } from "lucide-react";
 import MainLayout from "@/components/Layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,6 +58,9 @@ export default function RecruiterDashboard() {
     { name: "Emily Chen", position: "Product Manager", date: "2025-05-22T14:30:00", status: "Pending" },
     { name: "David Wilson", position: "UX Designer", date: "2025-05-23T11:00:00", status: "Confirmed" },
   ];
+
+  // Mock: Check if company profile is complete
+  const isCompanyProfileComplete = false;
   
   return (
     <MainLayout userType="recruiter">
@@ -65,6 +69,33 @@ export default function RecruiterDashboard() {
           <h1 className="mb-2">Recruiter Dashboard</h1>
           <p className="text-muted-foreground">Overview of your hiring activities</p>
         </div>
+
+        {/* Company Profile Completion Notice */}
+        {!isCompanyProfileComplete && (
+          <Card className="mb-6 border-orange-200 bg-orange-50">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-orange-100">
+                    <Building className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-orange-900">Complete Your Company Profile</h3>
+                    <p className="text-sm text-orange-700">
+                      Add your company information to help candidates understand your organization better and improve matching accuracy.
+                    </p>
+                  </div>
+                </div>
+                <Link to="/recruiter/company-profile">
+                  <Button variant="outline" className="gap-2 border-orange-300 text-orange-700 hover:bg-orange-100">
+                    Complete Profile
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
