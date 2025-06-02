@@ -2,11 +2,14 @@ import { useState } from "react";
 import MainLayout from "@/components/Layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Briefcase, Users, Calendar, MapPin } from "lucide-react";
+import { Briefcase, Users, Calendar, MapPin, Check, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import InterviewRounds from "@/components/recruiter/InterviewRounds";
+import ApplicantMetrics from "@/components/recruiter/ApplicantMetrics";
+import { toast } from "sonner";
 
 // Mock data
 const jobsByDepartment = {
@@ -136,9 +139,42 @@ const applicantRankingsData = [
 export default function YourPosts() {
   const departments = Object.keys(jobsByDepartment);
   const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [selectedApplicant, setSelectedApplicant] = useState<any>(null);
+  const [acceptedApplicants, setAcceptedApplicants] = useState<string[]>([]);
+  const [rejectedApplicants, setRejectedApplicants] = useState<string[]>([]);
   
   const handleJobClick = (job: any) => {
     setSelectedJob(job);
+  };
+  
+  const handleApplicantClick = (applicant: any) => {
+    // Mock assessment data - in real app this would come from API
+    const mockAssessmentData = {
+      score: 85,
+      strengths: ["Strong coding logic", "Problem-solving skills", "Clean code structure"],
+      improvements: ["Naming conventions", "Code comments", "Error handling"],
+      aiInsights: "This candidate demonstrates strong technical ability with excellent problem-solving skills. However, attention to naming conventions and code documentation could be improved. Overall, shows great potential for growth."
+    };
+    
+    setSelectedApplicant({ ...applicant, assessmentData: mockAssessmentData });
+  };
+
+  const handleAcceptApplicant = (applicantId: string) => {
+    setAcceptedApplicants([...acceptedApplicants, applicantId]);
+    setRejectedApplicants(rejectedApplicants.filter(id => id !== applicantId));
+    toast.success("Applicant accepted and moved to initial screening");
+  };
+
+  const handleRejectApplicant = (applicantId: string) => {
+    setRejectedApplicants([...rejectedApplicants, applicantId]);
+    setAcceptedApplicants(acceptedApplicants.filter(id => id !== applicantId));
+    toast.success("Applicant rejected");
+  };
+
+  const getApplicantStatus = (applicantId: string) => {
+    if (acceptedApplicants.includes(applicantId)) return "accepted";
+    if (rejectedApplicants.includes(applicantId)) return "rejected";
+    return "pending";
   };
   
   const getSkillBadgeColor = (level: string) => {
@@ -152,6 +188,11 @@ export default function YourPosts() {
       default:
         return "bg-gray-100 text-gray-800 hover:bg-gray-100";
     }
+  };
+
+  // Get accepted applicants for initial screening
+  const getAcceptedApplicantsForScreening = () => {
+    return applicantRankingsData.filter(app => acceptedApplicants.includes(app.id));
   };
 
   return (
@@ -279,11 +320,13 @@ export default function YourPosts() {
             
             <div className="mb-4">
               <InterviewRounds 
-                applicants={applicantRankingsData.map(app => ({
-                  id: app.id,
-                  name: app.name,
-                  matchScore: app.matchScore
-                }))}
+                applicants={[
+                  ...getAcceptedApplicantsForScreening().map(app => ({
+                    id: app.id,
+                    name: app.name,
+                    matchScore: app.matchScore
+                  }))
+                ]}
               />
             </div>
             
@@ -301,35 +344,73 @@ export default function YourPosts() {
                       <TableHead className="hidden md:table-cell">Soft Skills</TableHead>
                       <TableHead className="hidden lg:table-cell">Cultural Fit</TableHead>
                       <TableHead className="hidden lg:table-cell">Experience</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {applicantRankingsData.map((applicant) => (
-                      <TableRow key={applicant.id}>
-                        <TableCell className="font-medium">
-                          <Link to={`/recruiter/applicants/${applicant.id}`} className="text-hr-blue hover:underline">
-                            {applicant.name}
-                          </Link>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              applicant.matchScore >= 90 
-                                ? "bg-green-100 text-green-800" 
-                                : applicant.matchScore >= 80 
-                                  ? "bg-blue-100 text-blue-800" 
-                                  : "bg-yellow-100 text-yellow-800"
-                            }`}>
-                              {applicant.matchScore}%
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">{applicant.technicalScore}%</TableCell>
-                        <TableCell className="hidden md:table-cell">{applicant.softSkillsScore}%</TableCell>
-                        <TableCell className="hidden lg:table-cell">{applicant.culturalFitScore}%</TableCell>
-                        <TableCell className="hidden lg:table-cell">{applicant.experience}</TableCell>
-                      </TableRow>
-                    ))}
+                    {applicantRankingsData.map((applicant) => {
+                      const status = getApplicantStatus(applicant.id);
+                      return (
+                        <TableRow key={applicant.id} className={
+                          status === "accepted" ? "bg-green-50" : 
+                          status === "rejected" ? "bg-red-50" : ""
+                        }>
+                          <TableCell className="font-medium">
+                            <button 
+                              onClick={() => handleApplicantClick(applicant)}
+                              className="text-hr-blue hover:underline"
+                            >
+                              {applicant.name}
+                            </button>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                applicant.matchScore >= 90 
+                                  ? "bg-green-100 text-green-800" 
+                                  : applicant.matchScore >= 80 
+                                    ? "bg-blue-100 text-blue-800" 
+                                    : "bg-yellow-100 text-yellow-800"
+                              }`}>
+                                {applicant.matchScore}%
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">{applicant.technicalScore}%</TableCell>
+                          <TableCell className="hidden md:table-cell">{applicant.softSkillsScore}%</TableCell>
+                          <TableCell className="hidden lg:table-cell">{applicant.culturalFitScore}%</TableCell>
+                          <TableCell className="hidden lg:table-cell">{applicant.experience}</TableCell>
+                          <TableCell>
+                            {status === "pending" && (
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleAcceptApplicant(applicant.id)}
+                                  className="text-green-600 border-green-600 hover:bg-green-50"
+                                >
+                                  <Check className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleRejectApplicant(applicant.id)}
+                                  className="text-red-600 border-red-600 hover:bg-red-50"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            )}
+                            {status === "accepted" && (
+                              <Badge className="bg-green-100 text-green-800">Accepted</Badge>
+                            )}
+                            {status === "rejected" && (
+                              <Badge className="bg-red-100 text-red-800">Rejected</Badge>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </CardContent>

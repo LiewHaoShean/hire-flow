@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Plus, X, Users, MapPin, Clock } from "lucide-react";
 import { toast } from "sonner";
+import AssessmentConfiguration from "./AssessmentConfiguration";
 
 export interface InterviewRound {
   id: string;
@@ -18,6 +19,12 @@ export interface InterviewRound {
   duration: string;
   description: string;
   useAIAssessment?: boolean;
+  assessmentSkills?: string[];
+  assessmentQuestions?: Array<{
+    id: string;
+    question: string;
+    answer: string;
+  }>;
 }
 
 interface InterviewConfigurationProps {
@@ -35,13 +42,27 @@ export default function InterviewConfiguration({ onComplete, onBack }: Interview
     interviewType: "technical",
     duration: "",
     description: "",
-    useAIAssessment: false
+    useAIAssessment: false,
+    assessmentSkills: [],
+    assessmentQuestions: []
   });
 
   const addRound = () => {
     if (!newRound.title || !newRound.interviewer || !newRound.venue || !newRound.duration) {
       toast.error("Please fill in all required fields");
       return;
+    }
+
+    // Validate assessment configuration
+    if (newRound.interviewType === "assessment") {
+      if (newRound.useAIAssessment && (!newRound.assessmentSkills || newRound.assessmentSkills.length === 0)) {
+        toast.error("Please add at least one skill for AI assessment generation");
+        return;
+      }
+      if (!newRound.useAIAssessment && (!newRound.assessmentQuestions || newRound.assessmentQuestions.length === 0)) {
+        toast.error("Please add at least one assessment question");
+        return;
+      }
     }
 
     const round: InterviewRound = {
@@ -52,7 +73,9 @@ export default function InterviewConfiguration({ onComplete, onBack }: Interview
       interviewType: newRound.interviewType as "technical" | "behavioral" | "assessment" | "final",
       duration: newRound.duration!,
       description: newRound.description || "",
-      useAIAssessment: newRound.useAIAssessment || false
+      useAIAssessment: newRound.useAIAssessment || false,
+      assessmentSkills: newRound.assessmentSkills || [],
+      assessmentQuestions: newRound.assessmentQuestions || []
     };
 
     setRounds([...rounds, round]);
@@ -63,7 +86,9 @@ export default function InterviewConfiguration({ onComplete, onBack }: Interview
       interviewType: "technical",
       duration: "",
       description: "",
-      useAIAssessment: false
+      useAIAssessment: false,
+      assessmentSkills: [],
+      assessmentQuestions: []
     });
     setIsAddingRound(false);
     toast.success("Interview round added successfully!");
@@ -155,10 +180,20 @@ export default function InterviewConfiguration({ onComplete, onBack }: Interview
               {round.description && (
                 <p className="text-sm text-muted-foreground mt-3">{round.description}</p>
               )}
-              {round.useAIAssessment && (
-                <Badge variant="outline" className="mt-2">
-                  AI Assessment Enabled
-                </Badge>
+              {round.interviewType === "assessment" && (
+                <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                  {round.useAIAssessment ? (
+                    <div>
+                      <Badge variant="outline" className="mb-2">AI Assessment</Badge>
+                      <p className="text-sm text-muted-foreground">Skills: {round.assessmentSkills?.join(", ")}</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <Badge variant="outline" className="mb-2">Custom Questions</Badge>
+                      <p className="text-sm text-muted-foreground">{round.assessmentQuestions?.length} questions configured</p>
+                    </div>
+                  )}
+                </div>
               )}
             </CardContent>
           </Card>
@@ -242,15 +277,25 @@ export default function InterviewConfiguration({ onComplete, onBack }: Interview
             </div>
 
             {newRound.interviewType === "assessment" && (
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="aiAssessment"
-                  checked={newRound.useAIAssessment}
-                  onChange={(e) => setNewRound({ ...newRound, useAIAssessment: e.target.checked })}
-                  className="rounded border-gray-300"
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="aiAssessment"
+                    checked={newRound.useAIAssessment}
+                    onChange={(e) => setNewRound({ ...newRound, useAIAssessment: e.target.checked })}
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor="aiAssessment">Use AI-generated assessment questions</Label>
+                </div>
+
+                <AssessmentConfiguration
+                  useAIAssessment={newRound.useAIAssessment || false}
+                  onSkillsChange={(skills) => setNewRound({ ...newRound, assessmentSkills: skills })}
+                  onQuestionsChange={(questions) => setNewRound({ ...newRound, assessmentQuestions: questions })}
+                  initialSkills={newRound.assessmentSkills}
+                  initialQuestions={newRound.assessmentQuestions}
                 />
-                <Label htmlFor="aiAssessment">Use AI-generated assessment questions</Label>
               </div>
             )}
 
