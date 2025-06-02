@@ -190,9 +190,15 @@ export default function YourPosts() {
     }
   };
 
-  // Get accepted applicants for initial screening
+  // Get accepted applicants for initial screening with their full data
   const getAcceptedApplicantsForScreening = () => {
-    return applicantRankingsData.filter(app => acceptedApplicants.includes(app.id));
+    return applicantRankingsData
+      .filter(app => acceptedApplicants.includes(app.id))
+      .map(app => ({
+        id: app.id,
+        name: app.name,
+        matchScore: app.matchScore
+      }));
   };
 
   return (
@@ -320,13 +326,7 @@ export default function YourPosts() {
             
             <div className="mb-4">
               <InterviewRounds 
-                applicants={[
-                  ...getAcceptedApplicantsForScreening().map(app => ({
-                    id: app.id,
-                    name: app.name,
-                    matchScore: app.matchScore
-                  }))
-                ]}
+                applicants={getAcceptedApplicantsForScreening()}
               />
             </div>
             
