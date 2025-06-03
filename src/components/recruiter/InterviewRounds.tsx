@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Users, ArrowRight, Plus, Edit, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import ApplicantMetrics from "./ApplicantMetrics";
+import InterviewScheduler from "./InterviewScheduler";
 
 interface Applicant {
   id: string;
@@ -49,6 +50,11 @@ export default function InterviewRounds({ applicants }: InterviewRoundsProps) {
   const [editingRound, setEditingRound] = useState<string | null>(null);
   const [isAddingRound, setIsAddingRound] = useState(false);
   const [selectedApplicant, setSelectedApplicant] = useState<any>(null);
+  const [schedulerOpen, setSchedulerOpen] = useState(false);
+  const [schedulerData, setSchedulerData] = useState<{
+    applicant: Applicant;
+    round: InterviewRound;
+  } | null>(null);
 
   const [roundConfig, setRoundConfig] = useState<InterviewRound[]>([
     { 
@@ -117,6 +123,16 @@ export default function InterviewRounds({ applicants }: InterviewRoundsProps) {
       [draggedFromRound]: sourceRoundApplicants,
       [targetRound]: targetRoundApplicants
     }));
+
+    // Show scheduler popup for interview scheduling
+    const targetRoundConfig = roundConfig.find(r => r.key === targetRound);
+    if (targetRoundConfig) {
+      setSchedulerData({
+        applicant: draggedItem,
+        round: targetRoundConfig
+      });
+      setSchedulerOpen(true);
+    }
 
     setDraggedItem(null);
     setDraggedFromRound(null);
@@ -201,6 +217,12 @@ export default function InterviewRounds({ applicants }: InterviewRoundsProps) {
       
       setSelectedApplicant(mockApplicantData);
     }
+  };
+
+  const handleScheduleInterview = (scheduleData: any) => {
+    console.log("Interview scheduled:", scheduleData);
+    // In a real app, this would save to database
+    toast.success(`Interview scheduled for ${scheduleData.date.toDateString()} at ${scheduleData.time}`);
   };
 
   const getTypeColor = (type?: string) => {
@@ -462,6 +484,19 @@ export default function InterviewRounds({ applicants }: InterviewRoundsProps) {
           applicant={selectedApplicant}
           assessmentData={selectedApplicant.assessmentData}
           onClose={() => setSelectedApplicant(null)}
+        />
+      )}
+
+      {schedulerOpen && schedulerData && (
+        <InterviewScheduler
+          isOpen={schedulerOpen}
+          onClose={() => {
+            setSchedulerOpen(false);
+            setSchedulerData(null);
+          }}
+          applicantName={schedulerData.applicant.name}
+          interviewRound={schedulerData.round.title}
+          onSchedule={handleScheduleInterview}
         />
       )}
     </>

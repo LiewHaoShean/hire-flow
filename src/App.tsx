@@ -15,12 +15,14 @@ import JobListings from "./pages/applicant/JobListings";
 import JobDetails from "./pages/applicant/JobDetails";
 import SkillAssessment from "./pages/applicant/SkillAssessment";
 import VideoInterview from "./pages/applicant/VideoInterview";
+import ApplicantNotifications from "./pages/applicant/Notifications";
 import RecruiterDashboard from "./pages/recruiter/Dashboard";
 import JobPost from "./pages/recruiter/JobPost";
 import ApplicantReview from "./pages/recruiter/ApplicantReview";
 import RecommendedCandidates from "./pages/recruiter/RecommendedCandidates";
 import YourPosts from "./pages/recruiter/YourPosts";
 import CompanyProfile from "./pages/recruiter/CompanyProfile";
+import RecruiterNotifications from "./pages/recruiter/Notifications";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +47,7 @@ const App = () => (
           <Route path="/applicant/jobs/:id" element={<JobDetails />} />
           <Route path="/applicant/assessment" element={<SkillAssessment />} />
           <Route path="/applicant/interview" element={<VideoInterview />} />
+          <Route path="/applicant/notifications" element={<ApplicantNotifications />} />
           
           {/* Recruiter Routes */}
           <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
@@ -53,6 +56,7 @@ const App = () => (
           <Route path="/recruiter/company-profile" element={<CompanyProfile />} />
           <Route path="/recruiter/applicants/:id" element={<ApplicantReview />} />
           <Route path="/recruiter/recommendations" element={<RecommendedCandidates />} />
+          <Route path="/recruiter/notifications" element={<RecruiterNotifications />} />
           
           {/* 404 Route */}
           <Route path="*" element={<NotFound />} />

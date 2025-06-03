@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import InterviewRounds from "@/components/recruiter/InterviewRounds";
 import ApplicantMetrics from "@/components/recruiter/ApplicantMetrics";
+import InterviewScheduler from "@/components/recruiter/InterviewScheduler";
 import { toast } from "sonner";
 
 // Mock data
@@ -142,6 +143,8 @@ export default function YourPosts() {
   const [selectedApplicant, setSelectedApplicant] = useState<any>(null);
   const [acceptedApplicants, setAcceptedApplicants] = useState<string[]>([]);
   const [rejectedApplicants, setRejectedApplicants] = useState<string[]>([]);
+  const [schedulerOpen, setSchedulerOpen] = useState(false);
+  const [pendingApplicant, setPendingApplicant] = useState<any>(null);
   
   const handleJobClick = (job: any) => {
     setSelectedJob(job);
@@ -160,9 +163,20 @@ export default function YourPosts() {
   };
 
   const handleAcceptApplicant = (applicantId: string) => {
-    setAcceptedApplicants([...acceptedApplicants, applicantId]);
-    setRejectedApplicants(rejectedApplicants.filter(id => id !== applicantId));
-    toast.success("Applicant accepted and moved to initial screening");
+    const applicant = applicantRankingsData.find(app => app.id === applicantId);
+    if (applicant) {
+      setPendingApplicant(applicant);
+      setSchedulerOpen(true);
+    }
+  };
+
+  const handleScheduleAcceptedApplicant = (scheduleData: any) => {
+    if (pendingApplicant) {
+      setAcceptedApplicants([...acceptedApplicants, pendingApplicant.id]);
+      setRejectedApplicants(rejectedApplicants.filter(id => id !== pendingApplicant.id));
+      toast.success("Applicant accepted and interview scheduled");
+      setPendingApplicant(null);
+    }
   };
 
   const handleRejectApplicant = (applicantId: string) => {
@@ -418,6 +432,19 @@ export default function YourPosts() {
           </div>
         )}
       </div>
+
+      {schedulerOpen && pendingApplicant && (
+        <InterviewScheduler
+          isOpen={schedulerOpen}
+          onClose={() => {
+            setSchedulerOpen(false);
+            setPendingApplicant(null);
+          }}
+          applicantName={pendingApplicant.name}
+          interviewRound="Initial Screening"
+          onSchedule={handleScheduleAcceptedApplicant}
+        />
+      )}
     </MainLayout>
   );
 }
