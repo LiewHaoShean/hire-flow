@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,10 +30,18 @@ interface InterviewRoundsProps {
 
 export default function InterviewRounds({ applicants }: InterviewRoundsProps) {
   const [rounds, setRounds] = useState({
-    round1: applicants.map(app => ({ ...app })),
+    round1: [] as Applicant[],
     round2: [] as Applicant[],
     round3: [] as Applicant[]
   });
+
+  // Update round1 whenever applicants prop changes
+  useEffect(() => {
+    setRounds(prev => ({
+      ...prev,
+      round1: applicants
+    }));
+  }, [applicants]);
 
   const [draggedItem, setDraggedItem] = useState<Applicant | null>(null);
   const [draggedFromRound, setDraggedFromRound] = useState<string | null>(null);
