@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Users, ArrowRight, Plus, Edit, Check, X } from "lucide-react";
 import { toast } from "sonner";
+import ApplicantMetrics from "./ApplicantMetrics";
 
 interface Applicant {
   id: string;
@@ -47,6 +48,7 @@ export default function InterviewRounds({ applicants }: InterviewRoundsProps) {
   const [draggedFromRound, setDraggedFromRound] = useState<string | null>(null);
   const [editingRound, setEditingRound] = useState<string | null>(null);
   const [isAddingRound, setIsAddingRound] = useState(false);
+  const [selectedApplicant, setSelectedApplicant] = useState<any>(null);
 
   const [roundConfig, setRoundConfig] = useState<InterviewRound[]>([
     { 
@@ -60,12 +62,12 @@ export default function InterviewRounds({ applicants }: InterviewRoundsProps) {
     },
     { 
       key: 'round2', 
-      title: 'Technical Interview', 
+      title: 'Technical Assessment', 
       color: 'bg-yellow-50 border-yellow-200',
-      interviewer: 'Tech Lead',
-      venue: 'Meeting Room B',
+      interviewer: 'AI System',
+      venue: 'Online Platform',
       duration: '60 minutes',
-      interviewType: 'technical'
+      interviewType: 'assessment'
     },
     { 
       key: 'round3', 
@@ -176,6 +178,31 @@ export default function InterviewRounds({ applicants }: InterviewRoundsProps) {
     toast.success("New interview round added successfully!");
   };
 
+  const handleApplicantClick = (applicant: Applicant, round: InterviewRound) => {
+    if (round.interviewType === 'assessment') {
+      // Mock detailed applicant data with assessment results
+      const mockApplicantData = {
+        id: applicant.id,
+        name: applicant.name,
+        matchScore: applicant.matchScore,
+        technicalScore: 85,
+        softSkillsScore: 78,
+        culturalFitScore: 82,
+        experience: "4 years",
+        education: "Bachelor's in Computer Science",
+        skills: ["React", "TypeScript", "JavaScript", "CSS"],
+        assessmentData: {
+          score: 85,
+          strengths: ["Strong coding logic", "Problem-solving skills", "Clean code structure"],
+          improvements: ["Naming conventions", "Code comments", "Error handling"],
+          aiInsights: "This candidate demonstrates strong technical ability with excellent problem-solving skills. However, attention to naming conventions and code documentation could be improved. Overall, shows great potential for growth."
+        }
+      };
+      
+      setSelectedApplicant(mockApplicantData);
+    }
+  };
+
   const getTypeColor = (type?: string) => {
     switch (type) {
       case "technical":
@@ -192,90 +219,221 @@ export default function InterviewRounds({ applicants }: InterviewRoundsProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-lg flex items-center">
-            <Users className="h-5 w-5 mr-2" />
-            Interview Rounds
-          </CardTitle>
-          <Button 
-            onClick={() => setIsAddingRound(true)} 
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Add Round
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-          {roundConfig.map((round, index) => (
-            <div key={round.key}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <h4 className="font-medium text-sm">{round.title}</h4>
-                  <Badge variant="outline">
-                    {rounds[round.key as keyof typeof rounds]?.length || 0}
-                  </Badge>
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-lg flex items-center">
+              <Users className="h-5 w-5 mr-2" />
+              Interview Rounds
+            </CardTitle>
+            <Button 
+              onClick={() => setIsAddingRound(true)} 
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Round
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+            {roundConfig.map((round, index) => (
+              <div key={round.key}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-medium text-sm">{round.title}</h4>
+                    <Badge variant="outline">
+                      {rounds[round.key as keyof typeof rounds]?.length || 0}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => startEditRound(round)}
+                      className="h-6 w-6 p-0"
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    {index < roundConfig.length - 1 && (
+                      <ArrowRight className="h-4 w-4 text-muted-foreground ml-2" />
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => startEditRound(round)}
-                    className="h-6 w-6 p-0"
-                  >
-                    <Edit className="h-3 w-3" />
-                  </Button>
-                  {index < roundConfig.length - 1 && (
-                    <ArrowRight className="h-4 w-4 text-muted-foreground ml-2" />
-                  )}
+
+                {editingRound === round.key ? (
+                  <div className="space-y-3 p-3 border rounded-lg bg-white mb-3">
+                    <div>
+                      <Label className="text-xs">Title</Label>
+                      <Input
+                        value={editForm.title || ''}
+                        onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                        className="h-8"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Interviewer</Label>
+                      <Input
+                        value={editForm.interviewer || ''}
+                        onChange={(e) => setEditForm({ ...editForm, interviewer: e.target.value })}
+                        className="h-8"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Venue</Label>
+                      <Input
+                        value={editForm.venue || ''}
+                        onChange={(e) => setEditForm({ ...editForm, venue: e.target.value })}
+                        className="h-8"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Duration</Label>
+                      <Input
+                        value={editForm.duration || ''}
+                        onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })}
+                        className="h-8"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Type</Label>
+                      <Select
+                        value={editForm.interviewType}
+                        onValueChange={(value) => setEditForm({ ...editForm, interviewType: value as any })}
+                      >
+                        <SelectTrigger className="h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="technical">Technical</SelectItem>
+                          <SelectItem value="behavioral">Behavioral</SelectItem>
+                          <SelectItem value="assessment">Assessment</SelectItem>
+                          <SelectItem value="final">Final</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={saveRoundEdit} size="sm" className="h-6">
+                        <Check className="h-3 w-3" />
+                      </Button>
+                      <Button onClick={cancelEdit} variant="outline" size="sm" className="h-6">
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-1 text-xs text-muted-foreground mb-3">
+                    <div>👤 {round.interviewer}</div>
+                    <div>📍 {round.venue}</div>
+                    <div>⏱️ {round.duration}</div>
+                    <Badge className={getTypeColor(round.interviewType)} variant="secondary">
+                      {round.interviewType}
+                    </Badge>
+                  </div>
+                )}
+                
+                <div
+                  className={`min-h-[300px] p-3 rounded-lg border-2 border-dashed ${round.color} transition-colors`}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, round.key)}
+                >
+                  <div className="space-y-2">
+                    {rounds[round.key as keyof typeof rounds]?.map((applicant) => (
+                      <div
+                        key={applicant.id}
+                        draggable
+                        onDragStart={() => handleDragStart(applicant, round.key)}
+                        onClick={() => handleApplicantClick(applicant, round)}
+                        className={`bg-white p-3 rounded-lg border shadow-sm transition-shadow ${
+                          round.interviewType === 'assessment' 
+                            ? 'cursor-pointer hover:shadow-md hover:bg-blue-50' 
+                            : 'cursor-move hover:shadow-md'
+                        }`}
+                      >
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium text-sm">{applicant.name}</span>
+                          <Badge 
+                            variant="secondary" 
+                            className={`text-xs ${
+                              applicant.matchScore >= 90 
+                                ? "bg-green-100 text-green-800" 
+                                : applicant.matchScore >= 80 
+                                  ? "bg-blue-100 text-blue-800" 
+                                  : "bg-yellow-100 text-yellow-800"
+                            }`}
+                          >
+                            {applicant.matchScore}%
+                          </Badge>
+                        </div>
+                        {round.interviewType === 'assessment' && (
+                          <div className="text-xs text-muted-foreground mt-1">
+                            Click to view assessment results
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    
+                    {(!rounds[round.key as keyof typeof rounds] || rounds[round.key as keyof typeof rounds].length === 0) && (
+                      <div className="text-center text-muted-foreground text-sm py-8">
+                        Drop applicants here
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
+            ))}
+          </div>
 
-              {editingRound === round.key ? (
-                <div className="space-y-3 p-3 border rounded-lg bg-white mb-3">
+          {isAddingRound && (
+            <Card className="border-dashed">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Add New Interview Round</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-xs">Title</Label>
+                    <Label>Title*</Label>
                     <Input
-                      value={editForm.title || ''}
-                      onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                      className="h-8"
+                      placeholder="e.g. Panel Interview"
+                      value={newRoundForm.title}
+                      onChange={(e) => setNewRoundForm({ ...newRoundForm, title: e.target.value })}
                     />
                   </div>
                   <div>
-                    <Label className="text-xs">Interviewer</Label>
+                    <Label>Interviewer*</Label>
                     <Input
-                      value={editForm.interviewer || ''}
-                      onChange={(e) => setEditForm({ ...editForm, interviewer: e.target.value })}
-                      className="h-8"
+                      placeholder="e.g. Senior Manager"
+                      value={newRoundForm.interviewer}
+                      onChange={(e) => setNewRoundForm({ ...newRoundForm, interviewer: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label>Venue*</Label>
+                    <Input
+                      placeholder="e.g. Board Room"
+                      value={newRoundForm.venue}
+                      onChange={(e) => setNewRoundForm({ ...newRoundForm, venue: e.target.value })}
                     />
                   </div>
                   <div>
-                    <Label className="text-xs">Venue</Label>
+                    <Label>Duration</Label>
                     <Input
-                      value={editForm.venue || ''}
-                      onChange={(e) => setEditForm({ ...editForm, venue: e.target.value })}
-                      className="h-8"
+                      placeholder="e.g. 90 minutes"
+                      value={newRoundForm.duration}
+                      onChange={(e) => setNewRoundForm({ ...newRoundForm, duration: e.target.value })}
                     />
                   </div>
                   <div>
-                    <Label className="text-xs">Duration</Label>
-                    <Input
-                      value={editForm.duration || ''}
-                      onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })}
-                      className="h-8"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Type</Label>
+                    <Label>Type</Label>
                     <Select
-                      value={editForm.interviewType}
-                      onValueChange={(value) => setEditForm({ ...editForm, interviewType: value as any })}
+                      value={newRoundForm.interviewType}
+                      onValueChange={(value) => setNewRoundForm({ ...newRoundForm, interviewType: value as any })}
                     >
-                      <SelectTrigger className="h-8">
+                      <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -286,137 +444,26 @@ export default function InterviewRounds({ applicants }: InterviewRoundsProps) {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="flex gap-2">
-                    <Button onClick={saveRoundEdit} size="sm" className="h-6">
-                      <Check className="h-3 w-3" />
-                    </Button>
-                    <Button onClick={cancelEdit} variant="outline" size="sm" className="h-6">
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
                 </div>
-              ) : (
-                <div className="space-y-1 text-xs text-muted-foreground mb-3">
-                  <div>👤 {round.interviewer}</div>
-                  <div>📍 {round.venue}</div>
-                  <div>⏱️ {round.duration}</div>
-                  <Badge className={getTypeColor(round.interviewType)} variant="secondary">
-                    {round.interviewType}
-                  </Badge>
+                <div className="flex gap-2">
+                  <Button onClick={addNewRound}>Add Round</Button>
+                  <Button variant="outline" onClick={() => setIsAddingRound(false)}>
+                    Cancel
+                  </Button>
                 </div>
-              )}
-              
-              <div
-                className={`min-h-[300px] p-3 rounded-lg border-2 border-dashed ${round.color} transition-colors`}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, round.key)}
-              >
-                <div className="space-y-2">
-                  {rounds[round.key as keyof typeof rounds]?.map((applicant) => (
-                    <div
-                      key={applicant.id}
-                      draggable
-                      onDragStart={() => handleDragStart(applicant, round.key)}
-                      className="bg-white p-3 rounded-lg border shadow-sm cursor-move hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium text-sm">{applicant.name}</span>
-                        <Badge 
-                          variant="secondary" 
-                          className={`text-xs ${
-                            applicant.matchScore >= 90 
-                              ? "bg-green-100 text-green-800" 
-                              : applicant.matchScore >= 80 
-                                ? "bg-blue-100 text-blue-800" 
-                                : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
-                          {applicant.matchScore}%
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {(!rounds[round.key as keyof typeof rounds] || rounds[round.key as keyof typeof rounds].length === 0) && (
-                    <div className="text-center text-muted-foreground text-sm py-8">
-                      Drop applicants here
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+              </CardContent>
+            </Card>
+          )}
+        </CardContent>
+      </Card>
 
-        {isAddingRound && (
-          <Card className="border-dashed">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Add New Interview Round</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Title*</Label>
-                  <Input
-                    placeholder="e.g. Panel Interview"
-                    value={newRoundForm.title}
-                    onChange={(e) => setNewRoundForm({ ...newRoundForm, title: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label>Interviewer*</Label>
-                  <Input
-                    placeholder="e.g. Senior Manager"
-                    value={newRoundForm.interviewer}
-                    onChange={(e) => setNewRoundForm({ ...newRoundForm, interviewer: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label>Venue*</Label>
-                  <Input
-                    placeholder="e.g. Board Room"
-                    value={newRoundForm.venue}
-                    onChange={(e) => setNewRoundForm({ ...newRoundForm, venue: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label>Duration</Label>
-                  <Input
-                    placeholder="e.g. 90 minutes"
-                    value={newRoundForm.duration}
-                    onChange={(e) => setNewRoundForm({ ...newRoundForm, duration: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label>Type</Label>
-                  <Select
-                    value={newRoundForm.interviewType}
-                    onValueChange={(value) => setNewRoundForm({ ...newRoundForm, interviewType: value as any })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="technical">Technical</SelectItem>
-                      <SelectItem value="behavioral">Behavioral</SelectItem>
-                      <SelectItem value="assessment">Assessment</SelectItem>
-                      <SelectItem value="final">Final</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={addNewRound}>Add Round</Button>
-                <Button variant="outline" onClick={() => setIsAddingRound(false)}>
-                  Cancel
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </CardContent>
-    </Card>
+      {selectedApplicant && (
+        <ApplicantMetrics
+          applicant={selectedApplicant}
+          assessmentData={selectedApplicant.assessmentData}
+          onClose={() => setSelectedApplicant(null)}
+        />
+      )}
+    </>
   );
 }
