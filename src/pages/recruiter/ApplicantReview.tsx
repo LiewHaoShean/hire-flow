@@ -12,7 +12,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, Mail, Phone, Download, X } from "lucide-react";
+import { Check, Mail, Phone, Download, X, MessageCircle } from "lucide-react";
 import MainLayout from "@/components/Layout/MainLayout";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
@@ -51,6 +51,22 @@ export default function ApplicantReview() {
     certifications: ["Certified React Developer", "AWS Certified Developer"],
     resume: "john_doe_resume.pdf",
     profileCompletion: 85,
+    pastCompanyComments: [
+      {
+        company: "Tech Corp",
+        reviewer: "Sarah Johnson, Engineering Manager",
+        comment: "John was an exceptional team player with strong technical skills. He consistently delivered high-quality code and was always willing to help colleagues. His communication skills and ability to work under pressure were particularly noteworthy.",
+        rating: 4.8,
+        date: "March 2024"
+      },
+      {
+        company: "Web Solutions",
+        reviewer: "Mike Chen, Lead Developer",
+        comment: "Excellent frontend developer with great attention to detail. John's work on our main product interface significantly improved user experience. He's reliable, creative, and adapts quickly to new technologies.",
+        rating: 4.6,
+        date: "January 2020"
+      }
+    ]
   });
 
   return (
@@ -176,6 +192,36 @@ export default function ApplicantReview() {
                   <Download className="mr-2 h-4 w-4" />
                   Download Resume ({applicant.resume})
                 </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5" />
+                  Comments from Past Companies
+                </CardTitle>
+                <CardDescription>Feedback from previous employers</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {applicant.pastCompanyComments.map((comment, index) => (
+                  <div key={index} className={index > 0 ? "mt-6 pt-6 border-t" : ""}>
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h4 className="font-semibold">{comment.company}</h4>
+                        <p className="text-sm text-muted-foreground">{comment.reviewer}</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm font-medium">{comment.rating}</span>
+                          <span className="text-yellow-500">★</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{comment.date}</p>
+                      </div>
+                    </div>
+                    <p className="text-sm bg-gray-50 p-3 rounded-lg">{comment.comment}</p>
+                  </div>
+                ))}
               </CardContent>
             </Card>
 

@@ -45,7 +45,7 @@ export default function Home() {
               </Button>
             </Link>
             <Link to="/register?role=applicant">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+              <Button size="lg" className="bg-black text-white hover:bg-gray-800 border-black">
                 I'm a Job Seeker
               </Button>
             </Link>
