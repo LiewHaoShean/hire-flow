@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { X, User, Briefcase, GraduationCap, Star, Brain, Code, MessageSquare, Edit, Save, Cancel } from "lucide-react";
+import { X, User, Briefcase, GraduationCap, Star, Brain, Code, MessageSquare, Edit, Save } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 
@@ -121,7 +120,7 @@ export default function ApplicantMetrics({ applicant, assessmentData, onClose }:
                     Save
                   </Button>
                   <Button variant="outline" size="sm" onClick={handleCancel}>
-                    <Cancel className="h-4 w-4 mr-2" />
+                    <X className="h-4 w-4 mr-2" />
                     Cancel
                   </Button>
                 </>
