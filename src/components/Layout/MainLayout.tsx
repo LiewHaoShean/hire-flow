@@ -2,7 +2,7 @@ import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
   User, LogOut, FileText, BarChart, Briefcase, 
-  Users, Plus, Menu, X, List, Building
+  Users, Plus, Menu, X, List, Building, Bell
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -21,6 +21,7 @@ export default function MainLayout({ children, userType }: MainLayoutProps) {
     { name: "My Profile", path: "/applicant/profile", icon: <User className="w-5 h-5 mr-2" /> },
     { name: "Job Listings", path: "/applicant/jobs", icon: <Briefcase className="w-5 h-5 mr-2" /> },
     { name: "Skill Assessment", path: "/applicant/assessment", icon: <FileText className="w-5 h-5 mr-2" /> },
+    { name: "Notifications", path: "/applicant/notifications", icon: <Bell className="w-5 h-5 mr-2" /> },
   ];
   
   const recruiterLinks = [
@@ -29,6 +30,7 @@ export default function MainLayout({ children, userType }: MainLayoutProps) {
     { name: "Your Posts", path: "/recruiter/your-posts", icon: <List className="w-5 h-5 mr-2" /> },
     { name: "Company Profile", path: "/recruiter/company-profile", icon: <Building className="w-5 h-5 mr-2" /> },
     { name: "Recommendations", path: "/recruiter/recommendations", icon: <Users className="w-5 h-5 mr-2" /> },
+    { name: "Notifications", path: "/recruiter/notifications", icon: <Bell className="w-5 h-5 mr-2" /> },
   ];
   
   const links = userType === "applicant" ? applicantLinks : recruiterLinks;
