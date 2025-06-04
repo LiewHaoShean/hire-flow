@@ -1,231 +1,418 @@
-
 import { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Video, VideoOff, Mic, MicOff, PhoneOff, Camera, Volume2 } from "lucide-react";
+import { Play, Pause, RefreshCw, ChevronRight } from "lucide-react";
 import MainLayout from "@/components/Layout/MainLayout";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 export default function VideoInterview() {
-  const [isVideoOn, setIsVideoOn] = useState(true);
-  const [isAudioOn, setIsAudioOn] = useState(true);
-  const [interviewStarted, setInterviewStarted] = useState(false);
+  const { toast } = useToast();
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
+  const [videoSubmitted, setVideoSubmitted] = useState(false);
+  const [assessmentTimer, setAssessmentTimer] = useState(20); // Set to 20 seconds
+  const [isAssessmentActive, setIsAssessmentActive] = useState(false);
+  const [results, setResults] = useState<null | {
+    confidence: string;
+    communication: string;
+    culturalFit: string;
+    overall: string;
+    feedback: string;
+  }>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const assessmentTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
   const questions = [
-    "Tell me about yourself and your background in software development.",
-    "Describe a challenging project you've worked on recently.",
-    "How do you stay updated with the latest technology trends?",
-    "What interests you most about this position?",
-    "How do you handle tight deadlines and pressure?"
+    "Tell me about yourself and your background.",
+    "What are your greatest professional strengths?",
+    "Describe a challenging situation you faced at work and how you resolved it.",
+    "Why are you interested in this position?",
   ];
 
+  // Auto-submit when assessment timer reaches 0
   useEffect(() => {
-    if (interviewStarted && videoRef.current) {
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then(stream => {
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-          }
-        })
-        .catch(err => console.log("Error accessing camera:", err));
+    if (isAssessmentActive && assessmentTimer === 0) {
+      handleSubmitEvaluation();
     }
-  }, [interviewStarted]);
-
-  const toggleVideo = () => {
-    setIsVideoOn(!isVideoOn);
+  }, [assessmentTimer, isAssessmentActive]);
+  
+  const startRecording = () => {
+    setIsRecording(true);
+    setIsAssessmentActive(true);
+    setAssessmentTimer(20); // Reset to 20 seconds
+    
+    // Start recording timer
+    timerRef.current = setInterval(() => {
+      setRecordingTime(prev => prev + 1);
+    }, 1000);
+    
+    // Start assessment timer
+    assessmentTimerRef.current = setInterval(() => {
+      setAssessmentTimer(prev => {
+        if (prev <= 1) {
+          clearInterval(assessmentTimerRef.current!);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    
+    toast({
+      title: "Recording Started",
+      description: "You are now recording your response.",
+    });
   };
-
-  const toggleAudio = () => {
-    setIsAudioOn(!isAudioOn);
+  
+  const stopRecording = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    if (assessmentTimerRef.current) {
+      clearInterval(assessmentTimerRef.current);
+    }
+    setIsRecording(false);
+    setIsAssessmentActive(false);
+    
+    toast({
+      title: "Recording Stopped",
+      description: "Your response has been saved.",
+    });
   };
-
-  const startInterview = () => {
-    setInterviewStarted(true);
+  
+  const resetRecording = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    if (assessmentTimerRef.current) {
+      clearInterval(assessmentTimerRef.current);
+    }
+    setIsRecording(false);
+    setIsAssessmentActive(false);
+    setRecordingTime(0);
+    setAssessmentTimer(20);
+    
+    toast({
+      title: "Recording Reset",
+      description: "You can start a new recording.",
+    });
   };
-
+  
   const nextQuestion = () => {
     if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
+      setCurrentQuestion(prev => prev + 1);
+      setRecordingTime(0);
+      setAssessmentTimer(20);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      if (assessmentTimerRef.current) {
+        clearInterval(assessmentTimerRef.current);
+      }
+      setIsRecording(false);
+      setIsAssessmentActive(false);
+    } else {
+      submitInterview();
     }
   };
-
-  const endInterview = () => {
-    setInterviewStarted(false);
-    setCurrentQuestion(0);
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
+  
+  const handleSubmitEvaluation = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    if (assessmentTimerRef.current) {
+      clearInterval(assessmentTimerRef.current);
+    }
+    setIsRecording(false);
+    setIsAssessmentActive(false);
+    
+    if (assessmentTimer === 0) {
+      toast({
+        title: "Time's Up!",
+        description: "Your response has been automatically submitted.",
+      });
+    }
+    
+    nextQuestion();
+  };
+  
+  const submitInterview = () => {
+    setVideoSubmitted(true);
+    
+    // Simulate AI processing
+    setTimeout(() => {
+      setResults({
+        confidence: "A-",
+        communication: "B+",
+        culturalFit: "A",
+        overall: "A-",
+        feedback: "You demonstrated strong communication skills and cultural fit. Consider working on maintaining consistent eye contact and speaking with more confidence in your responses. Your answers were well-structured and showed good problem-solving abilities."
+      });
+      
+      toast({
+        title: "Interview Analysis Complete",
+        description: "View your results below.",
+      });
+    }, 3000);
+  };
+  
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+  
+  const getGradeColor = (grade: string) => {
+    switch (grade[0]) {
+      case 'A': return 'bg-green-100 text-green-800';
+      case 'B': return 'bg-blue-100 text-blue-800';
+      case 'C': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
-
-  if (!interviewStarted) {
-    return (
-      <MainLayout userType="applicant">
-        <div className="page-container">
-          <div className="mb-8">
-            <h1 className="mb-2">Video Interview</h1>
-            <p className="text-muted-foreground">
-              Prepare for your upcoming interview session
-            </p>
-          </div>
-
-          <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Interview Details</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <p className="font-medium">Position: Frontend Developer</p>
-                    <p className="text-sm text-muted-foreground">Tech Corp Inc.</p>
-                  </div>
-                  <div>
-                    <p className="font-medium">Interview Type: Technical</p>
-                    <p className="text-sm text-muted-foreground">Expected Duration: 45 minutes</p>
-                  </div>
-                  <div>
-                    <p className="font-medium">Interviewer: Sarah Johnson</p>
-                    <p className="text-sm text-muted-foreground">Senior Engineering Manager</p>
-                  </div>
-                  <Badge variant="outline" className="bg-green-50 text-green-700">
-                    AI-Powered Interview
-                  </Badge>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Technical Setup</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Camera & Audio Check</h4>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        <Camera className="h-4 w-4 mr-2" />
-                        Test Camera
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Volume2 className="h-4 w-4 mr-2" />
-                        Test Audio
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Interview Tips</h4>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>• Ensure good lighting and quiet environment</li>
-                      <li>• Have your resume and portfolio ready</li>
-                      <li>• Test your internet connection</li>
-                      <li>• Prepare questions about the role</li>
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="mt-8 text-center">
-              <Button onClick={startInterview} size="lg">
-                Start Interview
-              </Button>
-            </div>
-          </div>
-        </div>
-      </MainLayout>
-    );
-  }
-
+  
   return (
     <MainLayout userType="applicant">
       <div className="page-container">
-        <div className="mb-6">
-          <h1 className="mb-2">Live Interview Session</h1>
+        <div className="mb-8">
+          <h1 className="mb-2">Video Interview Assessment</h1>
           <p className="text-muted-foreground">
-            Question {currentQuestion + 1} of {questions.length}
+            Complete this mock interview to assess your soft skills
           </p>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Video Section */}
-          <div className="lg:col-span-2">
+        
+        {!videoSubmitted ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Interview Progress */}
             <Card>
-              <CardContent className="p-0">
-                <div className="relative bg-gray-900 rounded-lg overflow-hidden" style={{ aspectRatio: "16/9" }}>
-                  {isVideoOn ? (
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      muted
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <VideoOff className="h-16 w-16 text-gray-400" />
+              <CardHeader>
+                <CardTitle>Progress</CardTitle>
+                <CardDescription>Track your interview progress</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium">Question {currentQuestion + 1} of {questions.length}</span>
+                    <span className="text-sm font-medium">{Math.round(((currentQuestion + 1) / questions.length) * 100)}%</span>
+                  </div>
+                  <Progress value={((currentQuestion + 1) / questions.length) * 100} />
+                </div>
+                
+                <div className="space-y-4">
+                  {questions.map((q, i) => (
+                    <div key={i} className="flex items-center">
+                      <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-3 text-xs font-medium ${
+                        i < currentQuestion 
+                          ? "bg-green-500 text-white" 
+                          : i === currentQuestion 
+                            ? "bg-hr-blue text-white" 
+                            : "bg-gray-100 text-gray-400"
+                      }`}>
+                        {i + 1}
+                      </div>
+                      <p className={`text-sm ${
+                        i < currentQuestion 
+                          ? "text-green-600 line-through" 
+                          : i === currentQuestion 
+                            ? "text-hr-blue font-medium" 
+                            : "text-gray-400"
+                      }`}>
+                        {q.substring(0, 25)}...
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Video Recording */}
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Question {currentQuestion + 1}</CardTitle>
+                  <CardDescription>{questions[currentQuestion]}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {/* Video preview placeholder */}
+                  <div className="bg-gray-900 aspect-video rounded-lg flex items-center justify-center mb-4">
+                    <div className="text-white text-center p-6">
+                      {isRecording ? (
+                        <div className="flex items-center">
+                          <div className="animate-pulse w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                          <span>Recording... {formatTime(recordingTime)}</span>
+                        </div>
+                      ) : (
+                        <p>Camera preview will appear here</p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Assessment Timer */}
+                  {isAssessmentActive && (
+                    <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <div className="flex items-center justify-center">
+                        <span className="text-2xl font-bold text-red-600">
+                          {assessmentTimer}s
+                        </span>
+                      </div>
+                      <p className="text-center text-sm text-red-600 mt-1">
+                        Time remaining - Answer will auto-submit when timer reaches 0
+                      </p>
                     </div>
                   )}
                   
-                  {/* Controls */}
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-                    <Button
-                      variant={isVideoOn ? "secondary" : "destructive"}
-                      size="sm"
-                      onClick={toggleVideo}
-                    >
-                      {isVideoOn ? <Video className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
-                    </Button>
-                    <Button
-                      variant={isAudioOn ? "secondary" : "destructive"}
-                      size="sm"
-                      onClick={toggleAudio}
-                    >
-                      {isAudioOn ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
-                    </Button>
-                    <Button variant="destructive" size="sm" onClick={endInterview}>
-                      <PhoneOff className="h-4 w-4" />
+                  {/* Recording controls */}
+                  <div className="flex justify-center gap-3">
+                    {!isRecording ? (
+                      <Button onClick={startRecording} disabled={isRecording}>
+                        <Play className="h-4 w-4 mr-2" /> Start Recording
+                      </Button>
+                    ) : (
+                      <Button onClick={stopRecording} variant="destructive">
+                        <Pause className="h-4 w-4 mr-2" /> Stop Recording
+                      </Button>
+                    )}
+                    
+                    <Button variant="outline" onClick={resetRecording} disabled={isRecording && recordingTime === 0}>
+                      <RefreshCw className="h-4 w-4 mr-2" /> Reset
                     </Button>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <p className="text-sm text-muted-foreground">
+                    {currentQuestion < questions.length - 1 
+                      ? "After recording your answer, click 'Next Question'" 
+                      : "This is the final question. Click 'Submit Interview' when done."}
+                  </p>
+                  
+                  <Button 
+                    onClick={handleSubmitEvaluation} 
+                    disabled={recordingTime === 0 && !isAssessmentActive}
+                    className="ml-auto"
+                  >
+                    {currentQuestion < questions.length - 1 ? (
+                      <>Next Question <ChevronRight className="h-4 w-4 ml-1" /></>
+                    ) : (
+                      "Submit Interview"
+                    )}
+                  </Button>
+                </CardFooter>
+              </Card>
+              
+              <div className="mt-4">
+                <h3 className="text-lg font-medium mb-2">Tips for a successful video interview:</h3>
+                <ul className="list-disc pl-5 space-y-1 text-muted-foreground text-sm">
+                  <li>Ensure you are in a quiet environment with good lighting</li>
+                  <li>Speak clearly and maintain eye contact with the camera</li>
+                  <li>Keep your responses concise and relevant (20 seconds per question)</li>
+                  <li>Show enthusiasm and positive body language</li>
+                </ul>
+              </div>
+            </div>
           </div>
-
-          {/* Question Panel */}
-          <div className="lg:col-span-1">
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Results */}
             <Card>
               <CardHeader>
-                <CardTitle>Current Question</CardTitle>
+                <CardTitle>Interview Assessment Results</CardTitle>
+                <CardDescription>
+                  {results ? "AI-generated evaluation of your interview performance" : "Analyzing your responses..."}
+                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-sm font-medium text-blue-800">
-                    {questions[currentQuestion]}
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    Take your time to answer thoughtfully. The AI will analyze your response.
-                  </p>
-                </div>
-
-                <div className="flex gap-2">
-                  {currentQuestion < questions.length - 1 ? (
-                    <Button onClick={nextQuestion} className="flex-1">
-                      Next Question
-                    </Button>
-                  ) : (
-                    <Button onClick={endInterview} className="flex-1">
-                      Complete Interview
-                    </Button>
-                  )}
-                </div>
+              <CardContent>
+                {!results ? (
+                  <div className="flex flex-col items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hr-blue mb-4"></div>
+                    <p className="text-muted-foreground">Our AI is analyzing your interview responses</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="border rounded-lg p-4 text-center">
+                        <p className="text-sm text-muted-foreground mb-1">Confidence</p>
+                        <Badge className={`text-lg ${getGradeColor(results.confidence)}`}>
+                          {results.confidence}
+                        </Badge>
+                      </div>
+                      
+                      <div className="border rounded-lg p-4 text-center">
+                        <p className="text-sm text-muted-foreground mb-1">Communication</p>
+                        <Badge className={`text-lg ${getGradeColor(results.communication)}`}>
+                          {results.communication}
+                        </Badge>
+                      </div>
+                      
+                      <div className="border rounded-lg p-4 text-center">
+                        <p className="text-sm text-muted-foreground mb-1">Cultural Fit</p>
+                        <Badge className={`text-lg ${getGradeColor(results.culturalFit)}`}>
+                          {results.culturalFit}
+                        </Badge>
+                      </div>
+                      
+                      <div className="border rounded-lg p-4 text-center">
+                        <p className="text-sm text-muted-foreground mb-1">Overall Rating</p>
+                        <Badge className={`text-lg ${getGradeColor(results.overall)}`}>
+                          {results.overall}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="font-medium mb-2">Feedback</h3>
+                      <p className="text-muted-foreground">{results.feedback}</p>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+            
+            {/* Next Steps */}
+            <Card>
+              <CardHeader>
+                <CardTitle>What's Next?</CardTitle>
+                <CardDescription>Steps to leverage your assessment results</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-4">
+                  <li className="flex">
+                    <div className="bg-hr-blue/10 rounded-full p-1 w-7 h-7 flex items-center justify-center mr-3 text-hr-blue">1</div>
+                    <div>
+                      <h4 className="font-medium">Update Your Profile</h4>
+                      <p className="text-sm text-muted-foreground">Your assessment results have been added to your profile for potential employers to view.</p>
+                    </div>
+                  </li>
+                  
+                  <li className="flex">
+                    <div className="bg-hr-blue/10 rounded-full p-1 w-7 h-7 flex items-center justify-center mr-3 text-hr-blue">2</div>
+                    <div>
+                      <h4 className="font-medium">Review Areas for Improvement</h4>
+                      <p className="text-sm text-muted-foreground">Focus on the feedback provided to improve your interview performance.</p>
+                    </div>
+                  </li>
+                  
+                  <li className="flex">
+                    <div className="bg-hr-blue/10 rounded-full p-1 w-7 h-7 flex items-center justify-center mr-3 text-hr-blue">3</div>
+                    <div>
+                      <h4 className="font-medium">Apply to Jobs</h4>
+                      <p className="text-sm text-muted-foreground">Start applying to positions that match your skillset and personality traits.</p>
+                    </div>
+                  </li>
+                  
+                  <li className="flex">
+                    <div className="bg-hr-blue/10 rounded-full p-1 w-7 h-7 flex items-center justify-center mr-3 text-hr-blue">4</div>
+                    <div>
+                      <h4 className="font-medium">Retake Assessment (Optional)</h4>
+                      <p className="text-sm text-muted-foreground">You can retake this assessment in 30 days if you'd like to improve your scores.</p>
+                    </div>
+                  </li>
+                </ul>
               </CardContent>
             </Card>
           </div>
-        </div>
+        )}
       </div>
     </MainLayout>
   );

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import MainLayout from "@/components/Layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -371,12 +370,12 @@ export default function YourPosts() {
                           status === "rejected" ? "bg-red-50" : ""
                         }>
                           <TableCell className="font-medium">
-                            <Link 
-                              to={`/recruiter/applicants/${applicant.id}`}
+                            <button 
+                              onClick={() => handleApplicantClick(applicant)}
                               className="text-hr-blue hover:underline"
                             >
                               {applicant.name}
-                            </Link>
+                            </button>
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center">
