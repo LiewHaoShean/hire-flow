@@ -22,9 +22,9 @@ export default function SkillAssessment() {
     { name: "Node.js", questions: 7, timeLimit: 13, difficulty: "Intermediate" },
   ];
 
-  // Updated results to show React below 50%
+  // Reverted results to original
   const results = [
-    { skill: "React", score: 45, strengths: ["Component Structure", "Props Usage"], weaknesses: ["State Management", "Hooks"] },
+    { skill: "React", score: 78, strengths: ["Component Structure", "Props Usage"], weaknesses: ["State Management", "Hooks"] },
     { skill: "JavaScript", score: 78, strengths: ["ES6 Features", "Async Programming"], weaknesses: ["Closures", "Prototypes"] },
     { skill: "CSS", score: 65, strengths: ["Flexbox", "Grid"], weaknesses: ["Animations", "Responsive Design"] },
     { skill: "Node.js", score: 72, strengths: ["Express.js", "Middleware"], weaknesses: ["Authentication", "Database Integration"] },

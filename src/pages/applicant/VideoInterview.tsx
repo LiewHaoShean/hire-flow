@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,16 +9,7 @@ export default function VideoInterview() {
   const [isVideoOn, setIsVideoOn] = useState(true);
   const [isAudioOn, setIsAudioOn] = useState(true);
   const [interviewStarted, setInterviewStarted] = useState(false);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
-
-  const questions = [
-    "Tell me about yourself and your background in software development.",
-    "Describe a challenging project you've worked on recently.",
-    "How do you stay updated with the latest technology trends?",
-    "What interests you most about this position?",
-    "How do you handle tight deadlines and pressure?"
-  ];
 
   useEffect(() => {
     if (interviewStarted && videoRef.current) {
@@ -45,15 +35,8 @@ export default function VideoInterview() {
     setInterviewStarted(true);
   };
 
-  const nextQuestion = () => {
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-    }
-  };
-
   const endInterview = () => {
     setInterviewStarted(false);
-    setCurrentQuestion(0);
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
       stream.getTracks().forEach(track => track.stop());
@@ -144,87 +127,51 @@ export default function VideoInterview() {
         <div className="mb-6">
           <h1 className="mb-2">Live Interview Session</h1>
           <p className="text-muted-foreground">
-            Question {currentQuestion + 1} of {questions.length}
+            AI-powered interview in progress
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="max-w-4xl mx-auto">
           {/* Video Section */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardContent className="p-0">
-                <div className="relative bg-gray-900 rounded-lg overflow-hidden" style={{ aspectRatio: "16/9" }}>
-                  {isVideoOn ? (
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      muted
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <VideoOff className="h-16 w-16 text-gray-400" />
-                    </div>
-                  )}
-                  
-                  {/* Controls */}
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-                    <Button
-                      variant={isVideoOn ? "secondary" : "destructive"}
-                      size="sm"
-                      onClick={toggleVideo}
-                    >
-                      {isVideoOn ? <Video className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
-                    </Button>
-                    <Button
-                      variant={isAudioOn ? "secondary" : "destructive"}
-                      size="sm"
-                      onClick={toggleAudio}
-                    >
-                      {isAudioOn ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
-                    </Button>
-                    <Button variant="destructive" size="sm" onClick={endInterview}>
-                      <PhoneOff className="h-4 w-4" />
-                    </Button>
+          <Card>
+            <CardContent className="p-0">
+              <div className="relative bg-gray-900 rounded-lg overflow-hidden" style={{ aspectRatio: "16/9" }}>
+                {isVideoOn ? (
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    muted
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <VideoOff className="h-16 w-16 text-gray-400" />
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Question Panel */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle>Current Question</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-sm font-medium text-blue-800">
-                    {questions[currentQuestion]}
-                  </p>
-                </div>
+                )}
                 
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    Take your time to answer thoughtfully. The AI will analyze your response.
-                  </p>
+                {/* Controls */}
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+                  <Button
+                    variant={isVideoOn ? "secondary" : "destructive"}
+                    size="sm"
+                    onClick={toggleVideo}
+                  >
+                    {isVideoOn ? <Video className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
+                  </Button>
+                  <Button
+                    variant={isAudioOn ? "secondary" : "destructive"}
+                    size="sm"
+                    onClick={toggleAudio}
+                  >
+                    {isAudioOn ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
+                  </Button>
+                  <Button variant="destructive" size="sm" onClick={endInterview}>
+                    <PhoneOff className="h-4 w-4" />
+                  </Button>
                 </div>
-
-                <div className="flex gap-2">
-                  {currentQuestion < questions.length - 1 ? (
-                    <Button onClick={nextQuestion} className="flex-1">
-                      Next Question
-                    </Button>
-                  ) : (
-                    <Button onClick={endInterview} className="flex-1">
-                      Complete Interview
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </MainLayout>
