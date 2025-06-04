@@ -184,132 +184,82 @@ export default function VideoInterview() {
         </div>
         
         {!videoSubmitted ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Interview Progress */}
+          <div className="grid grid-cols-1 gap-6">
+            {/* Video Recording - Full Width */}
             <Card>
               <CardHeader>
-                <CardTitle>Progress</CardTitle>
-                <CardDescription>Track your interview progress</CardDescription>
+                <CardTitle>Interview Recording</CardTitle>
+                <CardDescription>Record your responses to the interview questions</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="mb-6">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium">Question {currentQuestion + 1} of {questions.length}</span>
-                    <span className="text-sm font-medium">{Math.round(((currentQuestion + 1) / questions.length) * 100)}%</span>
+                {/* Video preview placeholder */}
+                <div className="bg-gray-900 aspect-video rounded-lg flex items-center justify-center mb-4">
+                  <div className="text-white text-center p-6">
+                    {isRecording ? (
+                      <div className="flex items-center">
+                        <div className="animate-pulse w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                        <span>Recording... {formatTime(recordingTime)}</span>
+                      </div>
+                    ) : (
+                      <p>Camera preview will appear here</p>
+                    )}
                   </div>
-                  <Progress value={((currentQuestion + 1) / questions.length) * 100} />
                 </div>
                 
-                <div className="space-y-4">
-                  {questions.map((q, i) => (
-                    <div key={i} className="flex items-center">
-                      <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-3 text-xs font-medium ${
-                        i < currentQuestion 
-                          ? "bg-green-500 text-white" 
-                          : i === currentQuestion 
-                            ? "bg-hr-blue text-white" 
-                            : "bg-gray-100 text-gray-400"
-                      }`}>
-                        {i + 1}
-                      </div>
-                      <p className={`text-sm ${
-                        i < currentQuestion 
-                          ? "text-green-600 line-through" 
-                          : i === currentQuestion 
-                            ? "text-hr-blue font-medium" 
-                            : "text-gray-400"
-                      }`}>
-                        {q.substring(0, 25)}...
-                      </p>
+                {/* Assessment Timer */}
+                {isAssessmentActive && (
+                  <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <div className="flex items-center justify-center">
+                      <span className="text-2xl font-bold text-red-600">
+                        {assessmentTimer}s
+                      </span>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-            
-            {/* Video Recording */}
-            <div className="lg:col-span-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Question {currentQuestion + 1}</CardTitle>
-                  <CardDescription>{questions[currentQuestion]}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {/* Video preview placeholder */}
-                  <div className="bg-gray-900 aspect-video rounded-lg flex items-center justify-center mb-4">
-                    <div className="text-white text-center p-6">
-                      {isRecording ? (
-                        <div className="flex items-center">
-                          <div className="animate-pulse w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-                          <span>Recording... {formatTime(recordingTime)}</span>
-                        </div>
-                      ) : (
-                        <p>Camera preview will appear here</p>
-                      )}
-                    </div>
+                    <p className="text-center text-sm text-red-600 mt-1">
+                      Time remaining - Answer will auto-submit when timer reaches 0
+                    </p>
                   </div>
-                  
-                  {/* Assessment Timer */}
-                  {isAssessmentActive && (
-                    <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                      <div className="flex items-center justify-center">
-                        <span className="text-2xl font-bold text-red-600">
-                          {assessmentTimer}s
-                        </span>
-                      </div>
-                      <p className="text-center text-sm text-red-600 mt-1">
-                        Time remaining - Answer will auto-submit when timer reaches 0
-                      </p>
-                    </div>
+                )}
+                
+                {/* Recording controls */}
+                <div className="flex justify-center gap-3">
+                  {!isRecording ? (
+                    <Button onClick={startRecording} disabled={isRecording}>
+                      <Play className="h-4 w-4 mr-2" /> Start Recording
+                    </Button>
+                  ) : (
+                    <Button onClick={stopRecording} variant="destructive">
+                      <Pause className="h-4 w-4 mr-2" /> Stop Recording
+                    </Button>
                   )}
                   
-                  {/* Recording controls */}
-                  <div className="flex justify-center gap-3">
-                    {!isRecording ? (
-                      <Button onClick={startRecording} disabled={isRecording}>
-                        <Play className="h-4 w-4 mr-2" /> Start Recording
-                      </Button>
-                    ) : (
-                      <Button onClick={stopRecording} variant="destructive">
-                        <Pause className="h-4 w-4 mr-2" /> Stop Recording
-                      </Button>
-                    )}
-                    
-                    <Button variant="outline" onClick={resetRecording} disabled={isRecording && recordingTime === 0}>
-                      <RefreshCw className="h-4 w-4 mr-2" /> Reset
-                    </Button>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-between">
-                  <p className="text-sm text-muted-foreground">
-                    {currentQuestion < questions.length - 1 
-                      ? "After recording your answer, click 'Next Question'" 
-                      : "This is the final question. Click 'Submit Interview' when done."}
-                  </p>
-                  
-                  <Button 
-                    onClick={handleSubmitEvaluation} 
-                    disabled={recordingTime === 0 && !isAssessmentActive}
-                    className="ml-auto"
-                  >
-                    {currentQuestion < questions.length - 1 ? (
-                      <>Next Question <ChevronRight className="h-4 w-4 ml-1" /></>
-                    ) : (
-                      "Submit Interview"
-                    )}
+                  <Button variant="outline" onClick={resetRecording} disabled={isRecording && recordingTime === 0}>
+                    <RefreshCw className="h-4 w-4 mr-2" /> Reset
                   </Button>
-                </CardFooter>
-              </Card>
-              
-              <div className="mt-4">
-                <h3 className="text-lg font-medium mb-2">Tips for a successful video interview:</h3>
-                <ul className="list-disc pl-5 space-y-1 text-muted-foreground text-sm">
-                  <li>Ensure you are in a quiet environment with good lighting</li>
-                  <li>Speak clearly and maintain eye contact with the camera</li>
-                  <li>Keep your responses concise and relevant (20 seconds per question)</li>
-                  <li>Show enthusiasm and positive body language</li>
-                </ul>
-              </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Our AI will interact with you and ask questions during the interview
+                </p>
+                
+                <Button 
+                  onClick={handleSubmitEvaluation} 
+                  disabled={recordingTime === 0 && !isAssessmentActive}
+                  className="ml-auto"
+                >
+                  Submit Interview
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            <div className="mt-4">
+              <h3 className="text-lg font-medium mb-2">Tips for a successful video interview:</h3>
+              <ul className="list-disc pl-5 space-y-1 text-muted-foreground text-sm">
+                <li>Ensure you are in a quiet environment with good lighting</li>
+                <li>Speak clearly and maintain eye contact with the camera</li>
+                <li>Show enthusiasm and positive body language</li>
+                <li>Our AI will guide you through the interview process</li>
+              </ul>
             </div>
           </div>
         ) : (

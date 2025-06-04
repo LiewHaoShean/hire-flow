@@ -12,7 +12,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, Mail, Phone, Download, X } from "lucide-react";
+import { Check, Mail, Phone, Download, X, Star } from "lucide-react";
 import MainLayout from "@/components/Layout/MainLayout";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
@@ -51,6 +51,24 @@ export default function ApplicantReview() {
     certifications: ["Certified React Developer", "AWS Certified Developer"],
     resume: "john_doe_resume.pdf",
     profileCompletion: 85,
+    pastCompanyComments: [
+      {
+        company: "Tech Corp",
+        position: "Software Engineer",
+        rating: 4.5,
+        comment: "John was an excellent team member with strong technical skills. He consistently delivered high-quality code and was always willing to help teammates. His problem-solving abilities were particularly impressive.",
+        reviewer: "Sarah Johnson, Engineering Manager",
+        date: "March 2024"
+      },
+      {
+        company: "Web Solutions",
+        position: "Frontend Developer", 
+        rating: 4.2,
+        comment: "Reliable developer with good attention to detail. John showed great improvement in his coding practices during his tenure. He was proactive in learning new technologies and implementing best practices.",
+        reviewer: "Michael Chen, Technical Lead",
+        date: "December 2023"
+      }
+    ]
   });
 
   return (
@@ -163,6 +181,34 @@ export default function ApplicantReview() {
                     ))}
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle>Past Company Comments</CardTitle>
+                <CardDescription>Feedback from previous employers</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {applicant.pastCompanyComments.map((comment, index) => (
+                  <div key={index} className={index > 0 ? "mt-6 pt-6 border-t" : ""}>
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h4 className="font-semibold">{comment.company}</h4>
+                        <p className="text-sm text-muted-foreground">{comment.position}</p>
+                      </div>
+                      <div className="flex items-center">
+                        <Star className="h-4 w-4 text-yellow-500 fill-current mr-1" />
+                        <span className="text-sm font-medium">{comment.rating}/5</span>
+                      </div>
+                    </div>
+                    <p className="mb-2">{comment.comment}</p>
+                    <div className="text-xs text-muted-foreground">
+                      <p>{comment.reviewer}</p>
+                      <p>{comment.date}</p>
+                    </div>
+                  </div>
+                ))}
               </CardContent>
             </Card>
 

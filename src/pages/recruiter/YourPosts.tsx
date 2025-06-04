@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, Users, Calendar, MapPin, Check, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import InterviewRounds from "@/components/recruiter/InterviewRounds";
 import ApplicantMetrics from "@/components/recruiter/ApplicantMetrics";
@@ -138,6 +138,7 @@ const applicantRankingsData = [
 ];
 
 export default function YourPosts() {
+  const navigate = useNavigate();
   const departments = Object.keys(jobsByDepartment);
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [selectedApplicant, setSelectedApplicant] = useState<any>(null);
@@ -151,15 +152,8 @@ export default function YourPosts() {
   };
   
   const handleApplicantClick = (applicant: any) => {
-    // Mock assessment data - in real app this would come from API
-    const mockAssessmentData = {
-      score: 85,
-      strengths: ["Strong coding logic", "Problem-solving skills", "Clean code structure"],
-      improvements: ["Naming conventions", "Code comments", "Error handling"],
-      aiInsights: "This candidate demonstrates strong technical ability with excellent problem-solving skills. However, attention to naming conventions and code documentation could be improved. Overall, shows great potential for growth."
-    };
-    
-    setSelectedApplicant({ ...applicant, assessmentData: mockAssessmentData });
+    // Navigate to the applicant review page
+    navigate(`/recruiter/applicants/${applicant.id}`);
   };
 
   const handleAcceptApplicant = (applicantId: string) => {
