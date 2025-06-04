@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Play, Pause, RefreshCw, ChevronRight } from "lucide-react";
+import { Play, Pause, RefreshCw, ChevronRight, Mic, Video } from "lucide-react";
 import MainLayout from "@/components/Layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,8 @@ export default function VideoInterview() {
   const [videoSubmitted, setVideoSubmitted] = useState(false);
   const [assessmentTimer, setAssessmentTimer] = useState(20); // Set to 20 seconds
   const [isAssessmentActive, setIsAssessmentActive] = useState(false);
+  const [isMicOn, setIsMicOn] = useState(true);
+  const [isVideoOn, setIsVideoOn] = useState(true);
   const [results, setResults] = useState<null | {
     confidence: string;
     communication: string;
@@ -61,8 +63,8 @@ export default function VideoInterview() {
     }, 1000);
     
     toast({
-      title: "Recording Started",
-      description: "You are now recording your response.",
+      title: "Interview Started",
+      description: "You are now in an interview session.",
     });
   };
   
@@ -77,8 +79,8 @@ export default function VideoInterview() {
     setIsAssessmentActive(false);
     
     toast({
-      title: "Recording Stopped",
-      description: "Your response has been saved.",
+      title: "Interview Stopped",
+      description: "Your interview session has been paused.",
     });
   };
   
@@ -95,8 +97,8 @@ export default function VideoInterview() {
     setAssessmentTimer(20);
     
     toast({
-      title: "Recording Reset",
-      description: "You can start a new recording.",
+      title: "Interview Reset",
+      description: "You can start a new interview session.",
     });
   };
   
@@ -220,15 +222,36 @@ export default function VideoInterview() {
                   </div>
                 )}
                 
+                {/* Controls */}
+                <div className="flex justify-center gap-3 mb-4">
+                  {/* Mic Control */}
+                  <Button 
+                    variant={isMicOn ? "default" : "outline"}
+                    onClick={() => setIsMicOn(!isMicOn)}
+                  >
+                    <Mic className="h-4 w-4 mr-2" />
+                    {isMicOn ? "Mic On" : "Mic Off"}
+                  </Button>
+                  
+                  {/* Video Control */}
+                  <Button 
+                    variant={isVideoOn ? "default" : "outline"}
+                    onClick={() => setIsVideoOn(!isVideoOn)}
+                  >
+                    <Video className="h-4 w-4 mr-2" />
+                    {isVideoOn ? "Video On" : "Video Off"}
+                  </Button>
+                </div>
+                
                 {/* Recording controls */}
                 <div className="flex justify-center gap-3">
                   {!isRecording ? (
                     <Button onClick={startRecording} disabled={isRecording}>
-                      <Play className="h-4 w-4 mr-2" /> Start Recording
+                      <Play className="h-4 w-4 mr-2" /> Start Interview
                     </Button>
                   ) : (
                     <Button onClick={stopRecording} variant="destructive">
-                      <Pause className="h-4 w-4 mr-2" /> Stop Recording
+                      <Pause className="h-4 w-4 mr-2" /> Stop Interview
                     </Button>
                   )}
                   

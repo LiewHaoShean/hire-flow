@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -76,8 +75,16 @@ export default function SkillCard({ skill, level, category }: SkillCardProps) {
     
     // Simulate AI evaluation process
     setTimeout(() => {
-      // Generate a random rating between 30 and 95 to show different scenarios
-      const rating = Math.floor(Math.random() * 66) + 30;
+      let rating;
+      
+      // Special case for React - always return below 50%
+      if (skill.toLowerCase() === 'react') {
+        rating = Math.floor(Math.random() * 20) + 30; // 30-49
+      } else {
+        // Generate a random rating between 30 and 95 for other skills
+        rating = Math.floor(Math.random() * 66) + 30;
+      }
+      
       setSkillRating(rating);
       setIsEvaluating(false);
       setIsEvaluated(true);
